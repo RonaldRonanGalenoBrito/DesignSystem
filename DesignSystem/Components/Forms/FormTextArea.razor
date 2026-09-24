@@ -1,0 +1,31 @@
+@inherits FormFieldBase<string>
+@attribute [ComponentDoc(
+    Slug = "form-text-area",
+    Name = "FormTextArea",
+    Group = "Formulários",
+    Description = "Texto multilinha com altura configurável e validação integrada.",
+    Code = "<FormTextArea Label=\"Observações\" @bind-Value=\"notes\" Rows=\"4\" />\n\n@code {\n    private string notes = \"\";\n}",
+    Guidance = "Rows deve ser maior que zero. Readonly impede edição, mantendo a seleção do texto. ClassExtra estiliza o contêiner; class estiliza o controle."
+)]
+<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra">
+    <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
+        Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+        disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly" />
+</FieldLayout>
+
+@code {
+    [ParameterDoc("Quantidade de linhas visíveis; deve ser maior que zero.")]
+    [Parameter] public int Rows { get; set; } = 3;
+    [ParameterDoc("Texto de orientação ou opção vazia do select.")]
+    [Parameter] public string? Placeholder { get; set; }
+    [ParameterDoc("Impede alteração do valor pelo usuário.")]
+    [Parameter] public bool Readonly { get; set; }
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Rows < 1) throw new ArgumentOutOfRangeException(nameof(Rows));
+    }
+}
+
+
+

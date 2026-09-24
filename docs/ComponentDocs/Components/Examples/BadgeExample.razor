@@ -1,0 +1,17 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Badge))]
+
+<div class="options-panel">
+<label>Cor<select class="form-select form-select-sm mt-1" @bind="color">@foreach (var value in Enum.GetValues<ColorVariant>()) { <option value="@value">@value</option> }</select></label>
+<label class="form-check"><input class="form-check-input" type="checkbox" @bind="pill" /> Pill</label>
+</div>
+<CodeExample Code="@Code">
+<Badge Variant="@color" Pill="@pill">Ativo</Badge>
+</CodeExample>
+
+@code {
+    private ColorVariant color = ColorVariant.Primary;
+    private bool pill = true;
+    private string Code => $"<Badge Variant=\"ColorVariant.{color}\" Pill=\"{Bool(pill)}\">Ativo</Badge>";
+}
+

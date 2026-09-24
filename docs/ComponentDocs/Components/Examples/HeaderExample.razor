@@ -1,0 +1,12 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Header))]
+
+<CodeExample Code="@Code">
+<Header Title="Meu sistema"><Actions><Button Variant="ButtonVariant.OutlinePrimary">Meu perfil</Button></Actions></Header>
+</CodeExample>
+
+@code {
+    
+    private string Code => Entry.Code;
+}
+

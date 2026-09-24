@@ -1,0 +1,66 @@
+@attribute [ComponentDoc(
+    Slug = "sidebar",
+    Name = "Sidebar",
+    Group = "Layout",
+    Description = "Região de navegação com áreas opcionais de cabeçalho e rodapé.",
+    Code = "<Sidebar Label=\"Menu do projeto\">\n    <ChildContent>\n        <SidebarItem Href=\"componentes/sidebar\" Text=\"Visão geral\" Icon=\"grid\" />\n        <SidebarItem Href=\"componentes/button\" Text=\"Ações\" Icon=\"cursor\" />\n    </ChildContent>\n    <FooterContent>Versão 1.0</FooterContent>\n</Sidebar>",
+    Guidance = "Use dentro de SidebarContent do AppShell para receber o comportamento responsivo. HeaderContent aceita texto, imagem ou qualquer composição Razor. BackgroundColor e TextColor aceitam hexadecimal; as propriedades Item definem as cores dos links. Label dá nome à região de navegação para leitores de tela."
+)]
+
+<div @attributes="AdditionalAttributes" style="@ColorStyle" class="@ComponentAttributes.Classes(AdditionalAttributes, "sidebar d-flex flex-column p-1 gap-3", ClassExtra)">
+    @if (HeaderContent is not null)
+    {
+        <div>@HeaderContent</div>
+    }
+    <nav class="nav nav-pills flex-column gap-1" aria-label="@Label">
+        @ChildContent
+    </nav>
+    @if (FooterContent is not null)
+    {
+        <div class="mt-auto">@FooterContent</div>
+    }
+</div>
+
+@code {
+    [Parameter, ParameterDoc("Cor hexadecimal do fundo do menu. Null usa a cor herdada ou padrão.")]
+    public string? BackgroundColor { get; set; }
+    [Parameter, ParameterDoc("Cor hexadecimal do texto do menu e dos ícones. Null usa a cor herdada ou padrão.")]
+    public string? TextColor { get; set; }
+    [Parameter, ParameterDoc("Cor hexadecimal do fundo dos links. Null usa a cor herdada ou padrão.")]
+    public string? ItemBackgroundColor { get; set; }
+    [Parameter, ParameterDoc("Cor hexadecimal do texto e ícones dos links. Null usa a cor herdada ou padrão.")]
+    public string? ItemTextColor { get; set; }
+    [Parameter, ParameterDoc("Cor hexadecimal do fundo dos links em hover ou foco por teclado. Null usa a cor herdada ou padrão.")]
+    public string? ItemHoverBackgroundColor { get; set; }
+    [Parameter, ParameterDoc("Cor hexadecimal do texto dos links em hover ou foco por teclado. Null usa a cor herdada ou padrão.")]
+    public string? ItemHoverTextColor { get; set; }
+    [Parameter, ParameterDoc("Cor hexadecimal do fundo do link ativo. Null usa a cor herdada ou padrão.")]
+    public string? ItemActiveBackgroundColor { get; set; }
+    [Parameter, ParameterDoc("Cor hexadecimal do texto do link ativo. Null usa a cor herdada ou padrão.")]
+    public string? ItemActiveTextColor { get; set; }
+    private string ColorStyle => SidebarColors.Style(AdditionalAttributes,
+        ("--sidebar-bg", BackgroundColor),
+        ("--sidebar-color", TextColor),
+        ("--sidebar-item-bg", ItemBackgroundColor),
+        ("--sidebar-item-color", ItemTextColor),
+        ("--sidebar-item-hover-bg", ItemHoverBackgroundColor),
+        ("--sidebar-item-hover-color", ItemHoverTextColor),
+        ("--sidebar-item-active-bg", ItemActiveBackgroundColor),
+        ("--sidebar-item-active-color", ItemActiveTextColor));
+
+    [ParameterDoc("Rótulo visível ou acessível, conforme o componente.")]
+    [Parameter] public string Label { get; set; } = "Menu principal";
+    [ParameterDoc("Conteúdo personalizado do cabeçalho.")]
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [ParameterDoc("Conteúdo Razor interno.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Conteúdo personalizado do rodapé.")]
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+}
+
+
+

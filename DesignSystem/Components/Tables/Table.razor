@@ -1,0 +1,86 @@
+@typeparam TItem
+@attribute [ComponentDoc(
+    Slug = "table", Name = "Table", Group = "Dados",
+    Description = "Tabela tipada com templates, estilos Bootstrap e estados vazio e de carregamento.",
+    TypeArguments = new[] { typeof(string) },
+    Code = "<Table TItem=\"string\" Items=\"names\" ColumnCount=\"1\" Caption=\"Pessoas\" Striped Hover>\n    <HeaderContent><tr><th scope=\"col\">Nome</th></tr></HeaderContent>\n    <RowTemplate Context=\"name\"><td>@name</td></RowTemplate>\n</Table>\n\n@code {\n    private string[] names = [\"Ana\", \"Bruno\"];\n}",
+    Guidance = "HeaderContent e FooterContent recebem linhas completas; RowTemplate recebe apenas as células. ColumnCount define o colspan dos estados. A tabela exibe os Items recebidos; filtre, ordene e pagine na aplicação. Use um Caption ou aria-label descritivo. Não depende do JavaScript do Bootstrap."
+)]
+
+<div class="@(Responsive ? "table-responsive" : null)">
+    <table @attributes="AdditionalAttributes" class="@CssClass" aria-busy="@(IsLoading ? "true" : null)">
+        @if (!string.IsNullOrWhiteSpace(Caption)) { <caption>@Caption</caption> }
+        @if (HeaderContent is not null) { <thead>@HeaderContent</thead> }
+        <tbody>
+            @if (IsLoading)
+            {
+                <tr><td colspan="@ColumnCount" class="text-center py-4"><span role="status">@LoadingText</span></td></tr>
+            }
+            else if (rows.Count == 0)
+            {
+                <tr><td colspan="@ColumnCount" class="text-center text-body-secondary py-4">
+                    @if (EmptyContent is not null) { @EmptyContent } else { @EmptyText }
+                </td></tr>
+            }
+            else
+            {
+                @foreach (var item in rows)
+                {
+                    <tr @key="RowKey?.Invoke(item)">@(RowTemplate!(item))</tr>
+                }
+            }
+        </tbody>
+        @if (FooterContent is not null) { <tfoot>@FooterContent</tfoot> }
+    </table>
+</div>
+
+@code {
+    [Parameter, ParameterDoc("Itens exibidos. Null é tratado como coleção vazia.")]
+    public IEnumerable<TItem>? Items { get; set; }
+    [Parameter, EditorRequired, ParameterDoc("Template das células de uma linha; recebe o item atual.")]
+    public RenderFragment<TItem>? RowTemplate { get; set; }
+    [Parameter, ParameterDoc("Linhas do cabeçalho. Use th com scope=col.")]
+    public RenderFragment? HeaderContent { get; set; }
+    [Parameter, ParameterDoc("Linhas opcionais do rodapé.")]
+    public RenderFragment? FooterContent { get; set; }
+    [Parameter, ParameterDoc("Texto de identificação da tabela.")]
+    public string? Caption { get; set; }
+    [Parameter, ParameterDoc("Número de colunas, usado nos estados vazio e carregando; maior que zero.")]
+    public int ColumnCount { get; set; } = 1;
+    [Parameter, ParameterDoc("Conteúdo alternativo quando não há itens.")]
+    public RenderFragment? EmptyContent { get; set; }
+    [Parameter, ParameterDoc("Texto exibido quando não há itens e EmptyContent não foi informado.")]
+    public string EmptyText { get; set; } = "Nenhum registro encontrado.";
+    [Parameter, ParameterDoc("Exibe o estado de carregamento no lugar das linhas.")]
+    public bool IsLoading { get; set; }
+    [Parameter, ParameterDoc("Texto acessível de carregamento.")]
+    public string LoadingText { get; set; } = "Carregando registros...";
+    [Parameter, ParameterDoc("Habilita rolagem horizontal quando necessário.")]
+    public bool Responsive { get; set; } = true;
+    [Parameter, ParameterDoc("Alterna o fundo das linhas.")]
+    public bool Striped { get; set; }
+    [Parameter, ParameterDoc("Destaca a linha sob o ponteiro.")]
+    public bool Hover { get; set; }
+    [Parameter, ParameterDoc("Exibe bordas em todas as células.")]
+    public bool Bordered { get; set; }
+    [Parameter, ParameterDoc("Reduz o espaçamento interno das células.")]
+    public bool Small { get; set; }
+    [Parameter, ParameterDoc("Cor contextual opcional da tabela.")]
+    public ColorVariant? Variant { get; set; }
+    [Parameter, ParameterDoc("Chave estável e única por linha, para preservar estado ao reordenar itens.")]
+    public Func<TItem, object>? RowKey { get; set; }
+    [Parameter, ParameterDoc("Classes adicionais da tabela.")]
+    public string? ClassExtra { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML aplicados ao elemento table.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    private IReadOnlyList<TItem> rows = [];
+    private string CssClass => ComponentAttributes.Classes(AdditionalAttributes, "table align-middle",
+        Striped ? "table-striped" : null, Hover ? "table-hover" : null, Bordered ? "table-bordered" : null,
+        Small ? "table-sm" : null, Variant is { } color ? $"table-{color.ToString().ToLowerInvariant()}" : null, ClassExtra);
+    protected override void OnParametersSet()
+    {
+        if (ColumnCount < 1) throw new ArgumentOutOfRangeException(nameof(ColumnCount));
+        if (RowTemplate is null) throw new InvalidOperationException("Table requer RowTemplate.");
+        rows = IsLoading ? [] : Items?.ToArray() ?? [];
+    }
+}

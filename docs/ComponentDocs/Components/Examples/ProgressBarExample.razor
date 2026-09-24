@@ -1,0 +1,19 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(ProgressBar))]
+
+<div class="options-panel">
+<label>Cor<select class="form-select form-select-sm mt-1" @bind="color">@foreach (var value in Enum.GetValues<ColorVariant>()) { <option value="@value">@value</option> }</select></label>
+<label>Valor: @progress<input class="form-range d-block mt-1" type="range" min="0" max="100" @bind="progress" @bind:event="oninput" /></label>
+<label class="form-check"><input class="form-check-input" type="checkbox" @bind="animated" /> Animado</label>
+</div>
+<CodeExample Code="@Code">
+<ProgressBar Value="@progress" Max="100" Variant="@color" Label="Envio dos arquivos" ShowLabel Striped Animated="@animated" />
+</CodeExample>
+
+@code {
+    private ColorVariant color = ColorVariant.Primary;
+    private int progress = 65;
+    private bool animated;
+    private string Code => $"<ProgressBar Value=\"{progress}\" Max=\"100\" Variant=\"ColorVariant.{color}\"\n             Label=\"Envio dos arquivos\" ShowLabel Striped Animated=\"{Bool(animated)}\" />";
+}
+

@@ -1,0 +1,49 @@
+@inherits LayoutComponentBase
+@inject NavigationManager Navigation
+
+<div class="manual" data-bs-theme="@(dark ? "dark" : "light")">
+    <a class="visually-hidden-focusable skip-link" href="@($"{Navigation.ToBaseRelativePath(Navigation.Uri).Split('#')[0]}#manual-content")">Ir para o conteúdo</a>
+    <header class="manual-header">
+        <div class="manual-header-inner">
+            <a class="manual-brand" href=""><span class="brand-symbol"><Icon Name="braces" /></span> Componentes <span class="brand-docs">/ docs</span></a>
+            <span class="version-label">BLAZOR · .NET 8</span>
+            <button class="header-button theme-button" type="button" @onclick="() => dark = !dark" aria-label="@(dark ? "Usar tema claro" : "Usar tema escuro")">
+                <Icon Name="@(dark ? "sun" : "moon-stars")" /><span class="d-none d-sm-inline">@(dark ? "Claro" : "Escuro")</span>
+            </button>
+            <button class="header-button d-lg-none" type="button" @onclick="() => menuOpen = !menuOpen" aria-label="Alternar navegação" aria-expanded="@(menuOpen ? "true" : "false")" aria-controls="manual-navigation"><Icon Name="list" /></button>
+        </div>
+    </header>
+    <div class="manual-grid">
+        <aside id="manual-navigation" class="manual-sidebar @(menuOpen ? "is-open" : null)">
+            <label class="search-label" for="component-search">Buscar componente</label>
+            <div class="search-box"><Icon Name="search" /><input id="component-search" type="search" placeholder="Nome ou funcionalidade..." @bind="search" @bind:event="oninput" /></div>
+            <nav aria-label="Documentação">
+                <div class="nav-section-title"><Icon Name="book" /> Comece por aqui</div>
+                <NavLink href="" Match="NavLinkMatch.All" class="manual-nav-link" @onclick="CloseMenu">Introdução</NavLink>
+                @foreach (var group in Filtered.GroupBy(item => item.Group))
+                {
+                    <div class="nav-section-title">@group.Key</div>
+                    @foreach (var item in group)
+                    {
+                        <NavLink href="@($"componentes/{item.Slug}")" class="manual-nav-link" @onclick="CloseMenu">@item.Name</NavLink>
+                    }
+                }
+                @if (!Filtered.Any())
+                {
+                    <p class="small text-body-secondary mt-3" role="status">Nenhum componente encontrado.</p>
+                }
+            </nav>
+            <div class="sidebar-note"><Icon Name="bootstrap" /> Bootstrap 5.3 + Icons<br /><span>Exemplos com os componentes reais.</span></div>
+        </aside>
+        <main id="manual-content" class="manual-content" tabindex="-1">@Body</main>
+    </div>
+</div>
+
+@code {
+    private bool dark;
+    private bool menuOpen;
+    private string search = "";
+    private IEnumerable<ComponentEntry> Filtered => Catalog.All.Where(item =>
+        $"{item.Name} {item.Group} {item.Description}".Contains(search.Trim(), StringComparison.OrdinalIgnoreCase));
+    private void CloseMenu() => menuOpen = false;
+}

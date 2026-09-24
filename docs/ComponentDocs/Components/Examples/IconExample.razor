@@ -1,0 +1,12 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Icon))]
+
+<CodeExample Code="@Code">
+<Icon Name="check-circle" SizeClass="fs-3" ClassExtra="text-success" Label="Concluído" />
+</CodeExample>
+
+@code {
+    
+    private string Code => Entry.Code;
+}
+

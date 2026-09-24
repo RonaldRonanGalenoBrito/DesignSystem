@@ -1,0 +1,22 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Button))]
+
+<div class="options-panel">
+<label>Variante<select class="form-select form-select-sm mt-1" @bind="buttonVariant">@foreach (var value in Enum.GetValues<ButtonVariant>()) { <option value="@value">@value</option> }</select></label>
+<label>Tamanho<select class="form-select form-select-sm mt-1" @bind="buttonSize">@foreach (var value in Enum.GetValues<ButtonSize>()) { <option value="@value">@value</option> }</select></label>
+<label class="form-check"><input class="form-check-input" type="checkbox" @bind="loading" /> Carregando</label>
+<label class="form-check"><input class="form-check-input" type="checkbox" @bind="disabled" /> Desabilitado</label>
+</div>
+<CodeExample Code="@Code">
+<Button Variant="@buttonVariant" Size="@buttonSize" Icon="check-lg" IsLoading="@loading" Disabled="@disabled" OnClick="() => clicks++">Salvar alterações</Button>
+<span class="small text-body-secondary ms-3" role="status">Cliques: @clicks</span>
+</CodeExample>
+
+@code {
+    private ButtonVariant buttonVariant = ButtonVariant.Primary;
+    private ButtonSize buttonSize = ButtonSize.Medium;
+    private bool loading, disabled;
+    private int clicks;
+    private string Code => $"<Button Variant=\"ButtonVariant.{buttonVariant}\" Size=\"ButtonSize.{buttonSize}\"\n        Icon=\"check-lg\" IsLoading=\"{Bool(loading)}\" Disabled=\"{Bool(disabled)}\"\n        OnClick=\"() => clicks++\">Salvar alterações</Button>\n\n@code {{\n    private int clicks;\n}}";
+}
+

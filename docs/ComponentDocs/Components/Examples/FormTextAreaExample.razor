@@ -1,0 +1,13 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormTextArea))]
+
+<CodeExample Code="@Code">
+<FormTextArea Label="Observações" @bind-Value="notes" Rows="4" />
+<p class="small text-body-secondary mb-0">Valor: @notes</p>
+</CodeExample>
+
+@code {
+    private string notes = "";
+    private string Code => Entry.Code;
+}
+

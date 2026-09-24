@@ -1,0 +1,35 @@
+@attribute [ComponentDoc(
+    Slug = "sidebar-group",
+    Name = "SidebarGroup",
+    Group = "Layout",
+    Description = "Agrupamento recolhível de links com suporte nativo a teclado.",
+    Code = "<SidebarGroup Title=\"Cadastros\" Icon=\"folder2\" InitiallyExpanded>\n    <SidebarItem Href=\"componentes/form-input-text\" Text=\"Campos de texto\" />\n    <SidebarItem Href=\"componentes/form-select\" Text=\"Seletores\" />\n</SidebarGroup>",
+    Guidance = "O navegador controla a expansão através de details/summary. InitiallyExpanded define o estado inicial. Enter e Espaço podem alternar o grupo quando o resumo está focado."
+)]
+
+<details @attributes="AdditionalAttributes" class="@ComponentAttributes.Classes(AdditionalAttributes, "sidebar-group", ClassExtra)" open="@InitiallyExpanded">
+    <summary class="rounded px-3 py-2">
+        @if (!string.IsNullOrWhiteSpace(Icon))
+        {
+            <Icon Name="@Icon" ClassExtra="me-2" />
+        }
+        @Title
+    </summary>
+    <div class="nav nav-pills flex-column gap-1 ms-3 mt-1">@ChildContent</div>
+</details>
+
+@code {
+    [ParameterDoc("Título exibido.")]
+    [Parameter, EditorRequired] public string Title { get; set; } = "";
+    [ParameterDoc("Nome do Bootstrap Icon, sem o prefixo bi-.")]
+    [Parameter] public string? Icon { get; set; }
+    [ParameterDoc("Estado inicial do grupo recolhível.")]
+    [Parameter] public bool InitiallyExpanded { get; set; } = true;
+    [ParameterDoc("Conteúdo Razor interno.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+}
+

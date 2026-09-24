@@ -1,0 +1,27 @@
+@attribute [ComponentDoc(
+    Slug = "badge",
+    Name = "Badge",
+    Group = "Feedback",
+    Description = "Pequenos rótulos para status, categorias e contadores.",
+    Code = "<Badge Variant=\"ColorVariant.Success\" Pill>Ativo</Badge>",
+    Guidance = "Pill aplica bordas arredondadas. O tamanho acompanha a fonte do elemento pai. Inclua texto que explique o significado da cor."
+)]
+
+<span @attributes="AdditionalAttributes"
+      class="@ComponentAttributes.Classes(AdditionalAttributes, "badge", $"text-bg-{Variant.ToString().ToLowerInvariant()}", Pill ? "rounded-pill" : null, ClassExtra)">
+    @ChildContent
+</span>
+
+@code {
+    [ParameterDoc("Conteúdo Razor interno.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Variante de cor ou apresentação.")]
+    [Parameter] public ColorVariant Variant { get; set; } = ColorVariant.Secondary;
+    [ParameterDoc("Aplica formato arredondado.")]
+    [Parameter] public bool Pill { get; set; }
+    [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+}
+

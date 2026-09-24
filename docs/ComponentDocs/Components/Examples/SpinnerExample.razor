@@ -1,0 +1,18 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Spinner))]
+
+<div class="options-panel">
+<label>Cor<select class="form-select form-select-sm mt-1" @bind="color">@foreach (var value in Enum.GetValues<ColorVariant>()) { <option value="@value">@value</option> }</select></label>
+<label class="form-check"><input class="form-check-input" type="checkbox" @bind="small" /> Pequeno</label>
+<label class="form-check"><input class="form-check-input" type="checkbox" @bind="grow" /> Grow</label>
+</div>
+<CodeExample Code="@Code">
+<Spinner Variant="@color" Small="@small" Grow="@grow" Label="Carregando pedidos..." />
+</CodeExample>
+
+@code {
+    private ColorVariant color = ColorVariant.Primary;
+    private bool small, grow;
+    private string Code => $"<Spinner Variant=\"ColorVariant.{color}\" Small=\"{Bool(small)}\" Grow=\"{Bool(grow)}\"\n         Label=\"Carregando pedidos...\" />";
+}
+

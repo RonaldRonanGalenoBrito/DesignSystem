@@ -1,0 +1,40 @@
+@page "/"
+
+<PageTitle>Manual de componentes · Blazor</PageTitle>
+<div class="doc-page">
+    <article class="doc-article">
+        <div class="eyebrow">Documentação / Introdução</div>
+        <h1>Uma base para seus próximos projetos.</h1>
+        <p class="doc-lead">Componentes Blazor com a familiaridade do Bootstrap. Explore os exemplos, ajuste os estilos e leve o código para sua aplicação.</p>
+        <div class="doc-meta"><span>@Catalog.All.Count componentes</span><span>.NET 8</span><span>Bootstrap 5.3.3</span><span>Bootstrap Icons 1.11.3</span></div>
+        <section id="instalacao" class="doc-section">
+            <h2>Comece em poucos passos</h2>
+            <h3>1. Referencie a biblioteca</h3>
+            <pre class="install-code"><code>@ProjectReference</code></pre>
+            <h3>2. Carregue os estilos</h3>
+            <p>Adicione ao documento HTML principal. Substitua NomeDaSuaAplicacao pelo nome do assembly do projeto consumidor.</p>
+            <pre class="install-code"><code>@Styles</code></pre>
+            <h3>3. Importe os componentes</h3>
+            <pre class="install-code"><code>@Imports</code></pre>
+            <p class="mt-3">Adicione esses imports ao <code>_Imports.razor</code>. A biblioteca não impõe render mode: no Blazor Web App, configure a interatividade no Routes/Router para habilitar cliques e binding.</p>
+            <div class="usage-note">Este manual usa os componentes reais da biblioteca. O nome SIDEB permanece no projeto e nos namespaces; os nomes dos componentes são genéricos.</div>
+        </section>
+        <section id="catalogo" class="doc-section">
+            <h2>Explore os componentes</h2>
+            <div class="catalog-grid">
+                @foreach (var item in Catalog.All)
+                {
+                    <a class="catalog-card" href="@($"componentes/{item.Slug}")"><strong>@item.Name <span class="float-end text-body-secondary">↗</span></strong><p>@item.Description</p></a>
+                }
+            </div>
+        </section>
+        <section id="sobre" class="doc-section">
+            <h2>Como usar este manual</h2>
+            <p>Cada página reúne exemplos, orientações de uso, personalização e uma referência da API. Nos componentes de feedback, os seletores atualizam a prévia e o código mostrado.</p>
+            <p>O projeto <code>samples/LayoutDemo</code> continua disponível como exemplo de aplicação. Este projeto, <code>docs/ComponentDocs</code>, é o manual e pode evoluir junto com a biblioteca.</p>
+        </section>
+    </article>
+    <aside class="doc-toc" aria-label="Nesta página"><strong>Nesta página</strong><a href="#instalacao">Instalação</a><a href="#catalogo">Componentes</a><a href="#sobre">Sobre o manual</a></aside>
+</div>
+
+

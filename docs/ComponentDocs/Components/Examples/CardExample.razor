@@ -1,0 +1,15 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Card))]
+
+<CodeExample Code="@Code">
+<Card Title="Resumo do projeto" Subtitle="Atualizado hoje" Shadow>
+    <ChildContent>As informações mais importantes em um só lugar.</ChildContent>
+    <FooterContent>Última atualização: agora</FooterContent>
+</Card>
+</CodeExample>
+
+@code {
+    
+    private string Code => Entry.Code;
+}
+

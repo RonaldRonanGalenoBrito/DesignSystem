@@ -1,0 +1,41 @@
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div class="example-box">
+    @if (ChildContent is not null)
+    {
+        <div class="example-label"><span>EXEMPLO INTERATIVO</span><Icon Name="play-circle" /></div>
+        <div class="example-preview">@ChildContent</div>
+    }
+    <div class="code-toolbar"><span>RAZOR</span><button type="button" class="copy-button" @onclick="Copy" aria-label="Copiar código Razor"><Icon Name="clipboard" /> Copiar</button></div>
+    <pre><code>@Code</code></pre>
+    @if (copyStatus is not null)
+    {
+        <div class="copy-status small" role="status">@copyStatus</div>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Code { get; set; } = "";
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    private IJSObjectReference? module;
+    private string? copyStatus;
+    protected override void OnParametersSet() => copyStatus = null;
+    private async Task Copy()
+    {
+        try
+        {
+            module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./manual.js");
+            await module.InvokeVoidAsync("copy", Code);
+            copyStatus = "Código copiado.";
+        }
+        catch (JSException) { copyStatus = "Não foi possível copiar. Selecione o código e copie manualmente."; }
+        catch (JSDisconnectedException) { copyStatus = "Conexão interrompida. Selecione e copie o código manualmente."; }
+    }
+    public async ValueTask DisposeAsync()
+    {
+        if (module is null) return;
+        try { await module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+}

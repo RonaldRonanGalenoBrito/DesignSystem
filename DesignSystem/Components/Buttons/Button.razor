@@ -1,0 +1,114 @@
+@attribute [ComponentDoc(
+    Slug = "button",
+    Name = "Button",
+    Group = "Ações",
+    Description = "Ações com variantes sólidas e de contorno, tamanhos e ícones.",
+    Code = "<Button Variant=\"ButtonVariant.Primary\">Salvar</Button>",
+    Guidance = "Use Type=Submit dentro de um EditForm."
+)]
+
+<button @attributes="AdditionalAttributes" type="@GetButtonTypeString()"
+        class="@GetCssClasses()"
+        disabled="@IsDisabledOrLoading"
+        aria-busy="@(IsLoading ? "true" : null)" @onclick="HandleClick">
+    
+    @if (IsLoading)
+    {
+        <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+    }
+    else if (!string.IsNullOrEmpty(Icon) && IconPosition == IconPosition.Left)
+    {
+        <Icon Name="@Icon" ClassExtra="me-2" />
+    }
+
+    @ChildContent
+
+    @if (!IsLoading && !string.IsNullOrEmpty(Icon) && IconPosition == IconPosition.Right)
+    {
+        <Icon Name="@Icon" ClassExtra="ms-2" />
+    }
+</button>
+
+@code {
+    [ParameterDoc("Conteúdo Razor interno.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Cor do botão; inclui variantes sólidas, outline e link.")]
+    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
+    [ParameterDoc("Tamanho do botão.")]
+    [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
+    [ParameterDoc("Tipo HTML do botão: button, submit ou reset.")]
+    [Parameter] public ButtonType Type { get; set; } = ButtonType.Button;
+    [ParameterDoc("Callback executado no clique habilitado.")]
+    [Parameter] public EventCallback<MouseEventArgs> OnClick { get; set; }
+    [ParameterDoc("Desabilita interação.")]
+    [Parameter] public bool Disabled { get; set; }
+    [ParameterDoc("Exibe carregamento e bloqueia o clique.")]
+    [Parameter] public bool IsLoading { get; set; }
+    [ParameterDoc("Ocupa toda a largura disponível.")]
+    [Parameter] public bool Block { get; set; } // Ocupa 100% da largura (w-100)
+    
+    [ParameterDoc("Nome do Bootstrap Icon, sem o prefixo bi-.")]
+    
+    [Parameter] public string? Icon { get; set; }
+    [ParameterDoc("Posição do ícone em relação ao conteúdo.")]
+    [Parameter] public IconPosition IconPosition { get; set; } = IconPosition.Left;
+    
+    [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
+    
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool IsDisabledOrLoading => Disabled || IsLoading;
+
+    private async Task HandleClick(MouseEventArgs e)
+    {
+        if (!IsDisabledOrLoading && OnClick.HasDelegate)
+        {
+            await OnClick.InvokeAsync(e);
+        }
+    }
+
+    private string GetButtonTypeString() => Type switch
+    {
+        ButtonType.Submit => "submit",
+        ButtonType.Reset => "reset",
+        _ => "button"
+    };
+
+    private string GetCssClasses()
+    {
+        var classes = new List<string> { "btn" };
+
+        // Mapeia a variante (Primary -> btn-primary, OutlinePrimary -> btn-outline-primary)
+        classes.Add($"btn-{GetVariantClass(Variant)}");
+
+        // Tamanho
+        if (Size == ButtonSize.Small) classes.Add("btn-sm");
+        if (Size == ButtonSize.Large) classes.Add("btn-lg");
+
+        // Largura total
+        if (Block) classes.Add("w-100");
+
+        // Classes extras enviadas
+        if (!string.IsNullOrWhiteSpace(ClassExtra)) classes.Add(ClassExtra);
+
+        return ComponentAttributes.Classes(AdditionalAttributes, classes.ToArray());
+    }
+
+    private string GetVariantClass(ButtonVariant variant) => variant switch
+    {
+        ButtonVariant.OutlinePrimary => "outline-primary",
+        ButtonVariant.OutlineSecondary => "outline-secondary",
+        ButtonVariant.OutlineSuccess => "outline-success",
+        ButtonVariant.OutlineDanger => "outline-danger",
+        ButtonVariant.OutlineWarning => "outline-warning",
+        ButtonVariant.OutlineInfo => "outline-info",
+        ButtonVariant.OutlineLight => "outline-light",
+        ButtonVariant.OutlineDark => "outline-dark",
+        _ => variant.ToString().ToLowerInvariant()
+    };
+}
+
+

@@ -1,0 +1,15 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormSelect<>))]
+
+<CodeExample Code="@Code">
+<FormSelect TValue="int?" Label="Prioridade" @bind-Value="priority" Placeholder="Selecione">
+    <option value="1">Normal</option><option value="2">Alta</option>
+</FormSelect>
+<p class="small text-body-secondary mb-0">Valor: @(priority?.ToString() ?? "null")</p>
+</CodeExample>
+
+@code {
+    private int? priority;
+    private string Code => Entry.Code;
+}
+

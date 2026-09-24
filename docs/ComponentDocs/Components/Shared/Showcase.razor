@@ -1,0 +1,19 @@
+@if (exampleType is not null)
+{
+    <DynamicComponent Type="@exampleType" Parameters="@parameters" @key="Entry.ComponentType" />
+}
+else
+{
+    <p class="text-body-secondary">Este componente ainda não possui prévia interativa. Consulte o exemplo de código e os parâmetros abaixo.</p>
+}
+
+@code {
+    [Parameter, EditorRequired] public ComponentEntry Entry { get; set; } = default!;
+    private Type? exampleType;
+    private IDictionary<string, object> parameters = new Dictionary<string, object>();
+    protected override void OnParametersSet()
+    {
+        exampleType = ExampleCatalog.Find(Entry.ComponentType);
+        parameters = new Dictionary<string, object> { [nameof(ExampleBase.Entry)] = Entry };
+    }
+}

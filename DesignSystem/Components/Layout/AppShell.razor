@@ -1,0 +1,83 @@
+@attribute [ComponentDoc(
+    Slug = "app-shell",
+    Name = "AppShell",
+    Group = "Layout",
+    Description = "Estrutura responsiva com header, menu lateral, conteúdo e rodapé.",
+    Code = "<AppShell Title=\"Meu sistema\">\n    <SidebarContent>\n        <Sidebar>\n            <SidebarItem Href=\"\" Text=\"Início\" Icon=\"house\" Match=\"NavLinkMatch.All\" />\n        </Sidebar>\n    </SidebarContent>\n    <ChildContent><h2>Bem-vindo</h2></ChildContent>\n    <FooterContent>Minha aplicação</FooterContent>\n</AppShell>",
+    Guidance = "Em MainLayout.razor, use @Body no ChildContent. Carregue o bundle NomeDaAplicacao.styles.css. No desktop, o menu ocupa toda a altura da lateral e header/footer ficam à direita; abaixo de 992 px, abre acima do conteúdo."
+)]
+
+<CascadingValue Value="@Context">
+    <div @attributes="AdditionalAttributes" class="@ComponentAttributes.Classes(AdditionalAttributes, "app-shell", SidebarContent is not null ? "has-sidebar" : null, ClassExtra)">
+        <a class="visually-hidden-focusable position-absolute bg-body p-3 z-3" href="@($"#{MainId}")">@SkipLinkLabel</a>
+        <div class="app-shell-body">
+            @if (SidebarContent is not null)
+            {
+                <aside id="@SidebarId" class="app-shell-sidebar @(menuOpen ? "is-open" : null)">
+                    @SidebarContent
+                </aside>
+            }
+            <div class="app-shell-page">
+                <div class="app-shell-header">
+                    @if (HeaderContent is not null)
+                    {
+                        @HeaderContent
+                    }
+                    else
+                    {
+                        <Header Title="@Title" />
+                    }
+                </div>
+                <main id="@MainId" tabindex="-1" class="p-3 p-lg-4 @ContentClass">
+                    @ChildContent
+                </main>
+                @if (FooterContent is not null)
+                {
+                    <footer class="border-top px-3 px-lg-4 py-3 mt-auto">@FooterContent</footer>
+                }
+            </div>
+        </div>
+    </div>
+</CascadingValue>
+
+@code {
+    [ParameterDoc("Título exibido.")]
+    [Parameter] public string? Title { get; set; }
+    [ParameterDoc("Conteúdo personalizado do cabeçalho.")]
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [ParameterDoc("Conteúdo da região lateral.")]
+    [Parameter] public RenderFragment? SidebarContent { get; set; }
+    [ParameterDoc("Conteúdo Razor interno.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Conteúdo personalizado do rodapé.")]
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [ParameterDoc("Texto do atalho para o conteúdo principal.")]
+    [Parameter] public string SkipLinkLabel { get; set; } = "Ir para o conteúdo";
+    [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Classes da região principal.")]
+    [Parameter] public string? ContentClass { get; set; }
+    [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private readonly string SidebarId = $"sidebar-{Guid.NewGuid():N}";
+    private readonly string MainId = $"main-{Guid.NewGuid():N}";
+    private bool menuOpen;
+    private LayoutContext? Context => SidebarContent is null ? null : new(SidebarId, menuOpen, ToggleMenu, CloseMenu);
+
+    public Task ToggleMenu()
+    {
+        menuOpen = !menuOpen;
+        return InvokeAsync(StateHasChanged);
+    }
+
+    public Task CloseMenu()
+    {
+        menuOpen = false;
+        return InvokeAsync(StateHasChanged);
+    }
+
+}
+
+
+

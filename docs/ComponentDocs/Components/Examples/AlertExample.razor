@@ -1,0 +1,18 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Alert))]
+
+<div class="options-panel">
+<label>Variante<select class="form-select form-select-sm mt-1" @bind="alertVariant">@foreach (var value in Enum.GetValues<AlertVariant>()) { <option value="@value">@value</option> }</select></label>
+<button class="btn btn-sm btn-outline-secondary" type="button" @onclick="() => visible = true">Reabrir alerta</button>
+</div>
+<CodeExample Code="@Code">
+<Alert Variant="@alertVariant" Dismissible @bind-Visible="visible">Alterações salvas.</Alert>
+@if (!visible) { <p class="text-body-secondary small mb-0">Alerta fechado. Use “Reabrir alerta” para exibir novamente.</p> }
+</CodeExample>
+
+@code {
+    private AlertVariant alertVariant = AlertVariant.Success;
+    private bool visible = true;
+    private string Code => $"<Alert Variant=\"AlertVariant.{alertVariant}\" Dismissible @bind-Visible=\"visible\">Alterações salvas.</Alert>\n\n@code {{\n    private bool visible = true;\n}}";
+}
+

@@ -1,0 +1,27 @@
+@typeparam TValue
+@inherits FormFieldBase<TValue>
+@attribute [ComponentDoc(
+    Slug = "form-input-date",
+    TypeArguments = new[] { typeof(DateOnly?) },
+    Name = "FormInputDate",
+    Group = "Formulários",
+    Description = "Datas tipadas com o seletor nativo do navegador.",
+    Code = "<FormInputDate TValue=\"DateOnly?\" Label=\"Data\" @bind-Value=\"date\" />\n\n@code {\n    private DateOnly? date;\n}",
+    Guidance = "O controle usa InputDate do Blazor no modo de data. DateOnly e DateTime, inclusive anuláveis, atendem ao uso comum. A aparência do calendário depende do navegador."
+)]
+
+<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra">
+    <InputDate TValue="TValue" @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
+        Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+        disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" readonly="@Readonly" ParsingErrorMessage="@ParsingErrorMessage" />
+</FieldLayout>
+
+@code {
+    [ParameterDoc("Impede alteração do valor pelo usuário.")]
+    [Parameter] public bool Readonly { get; set; }
+    [ParameterDoc("Mensagem de conversão inválida; {0} recebe o nome do campo.")]
+    [Parameter] public string ParsingErrorMessage { get; set; } = "O campo {0} deve conter uma data válida.";
+}
+
+
+

@@ -1,0 +1,16 @@
+.sidebar-item { display: contents; }
+.sidebar-item ::deep .sidebar-link {
+    color: var(--sidebar-item-color, var(--sidebar-color, var(--bs-nav-link-color)));
+    background-color: var(--sidebar-item-bg, transparent);
+}
+.sidebar-item ::deep .sidebar-link:hover,
+.sidebar-item ::deep .sidebar-link:focus-visible {
+    color: var(--sidebar-item-hover-color, var(--bs-nav-link-hover-color));
+    background-color: var(--sidebar-item-hover-bg, var(--bs-tertiary-bg));
+}
+.sidebar-item ::deep .sidebar-link.active {
+    color: var(--sidebar-item-active-color, var(--bs-nav-pills-link-active-color));
+    background-color: var(--sidebar-item-active-bg, var(--bs-nav-pills-link-active-bg));
+}
+.sidebar-item ::deep .sidebar-link.disabled { opacity: .5; pointer-events: none; }
+

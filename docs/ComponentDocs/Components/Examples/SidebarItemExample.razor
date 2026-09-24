@@ -1,0 +1,14 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(SidebarItem))]
+
+<CodeExample Code="@Code">
+<div class="nav nav-pills">
+    <SidebarItem Href="componentes/sidebar-item" Text="Componentes" Icon="grid" Match="NavLinkMatch.All"><Badge ClassExtra="ms-auto">18</Badge></SidebarItem>
+</div>
+</CodeExample>
+
+@code {
+    
+    private string Code => Entry.Code;
+}
+

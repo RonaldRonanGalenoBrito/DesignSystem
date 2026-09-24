@@ -1,0 +1,15 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(SidebarGroup))]
+
+<CodeExample Code="@Code">
+<SidebarGroup Title="Cadastros" Icon="folder2" InitiallyExpanded>
+    <SidebarItem Href="componentes/form-input-text" Text="Campos de texto" />
+    <SidebarItem Href="componentes/form-select" Text="Seletores" />
+</SidebarGroup>
+</CodeExample>
+
+@code {
+    
+    private string Code => Entry.Code;
+}
+

@@ -1,0 +1,27 @@
+@inherits FormFieldBase<string>
+@attribute [ComponentDoc(
+    Slug = "form-input-text",
+    Name = "FormInputText",
+    Group = "Formulários",
+    Description = "Campo de texto com rótulo, ajuda, validação e suporte a binding.",
+    Code = "<FormInputText Label=\"Nome\" @bind-Value=\"name\" HelpText=\"Como podemos chamar você?\" />\n\n@code {\n    private string name = \"\";\n}",
+    Guidance = "O valor continua sendo string ao alterar Type. O binding atualiza no evento change. Use FormInputNumber e FormInputDate para valores tipados."
+)]
+<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra">
+    <InputText @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
+        Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+        disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" type="@Type" placeholder="@Placeholder" readonly="@Readonly" />
+</FieldLayout>
+
+@code {
+    [ParameterDoc("Tipo HTML do campo, como text, email ou password. O valor permanece string.")]
+    [Parameter] public string Type { get; set; } = "text";
+    [ParameterDoc("Texto de orientação ou opção vazia do select.")]
+    [Parameter] public string? Placeholder { get; set; }
+    [ParameterDoc("Impede alteração do valor pelo usuário.")]
+    [Parameter] public bool Readonly { get; set; }
+}
+
+
+
+

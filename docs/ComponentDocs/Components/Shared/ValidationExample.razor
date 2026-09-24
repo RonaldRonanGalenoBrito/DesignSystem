@@ -1,0 +1,8 @@
+<CodeExample Code="@Sample">
+    <EditForm Model="@model" OnValidSubmit="() => saved = true" OnInvalidSubmit="() => saved = false" FormName="manual-validation">
+        <DataAnnotationsValidator />
+        <FormInputText Label="Nome" @bind-Value="model.Name" />
+        <Button Type="ButtonType.Submit">Validar formulário</Button>
+    </EditForm>
+    @if (saved) { <p class="text-success mt-3 mb-0" role="status">Formulário válido.</p> }
+</CodeExample>

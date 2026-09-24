@@ -1,0 +1,13 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormInputDate<>))]
+
+<CodeExample Code="@Code">
+<FormInputDate TValue="DateOnly?" Label="Data" @bind-Value="date" />
+<p class="small text-body-secondary mb-0">Valor: @(date?.ToString("dd/MM/yyyy") ?? "null")</p>
+</CodeExample>
+
+@code {
+    private DateOnly? date;
+    private string Code => Entry.Code;
+}
+

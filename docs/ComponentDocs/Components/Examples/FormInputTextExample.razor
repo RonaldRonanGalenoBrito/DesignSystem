@@ -1,0 +1,13 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormInputText))]
+
+<CodeExample Code="@Code">
+<FormInputText Label="Nome" @bind-Value="name" HelpText="Como podemos chamar você?" />
+<p class="small text-body-secondary mb-0">Valor: @name</p>
+</CodeExample>
+
+@code {
+    private string name = "";
+    private string Code => Entry.Code;
+}
+

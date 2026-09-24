@@ -1,0 +1,80 @@
+@attribute [ComponentDoc(
+    Slug = "pagination", Name = "Pagination", Group = "Dados",
+    Description = "Navegação entre páginas com janela de números, reticências e binding.",
+    Code = "<Pagination PageCount=\"12\" @bind-CurrentPage=\"page\" />\n\n@code {\n    private int page = 1;\n}",
+    Guidance = "CurrentPage começa em 1. PageCount deve ser zero ou positivo. Use @bind-CurrentPage ou CurrentPageChanged para carregar ou recortar os dados; a paginação não consulta nem modifica a tabela. Ao reduzir o total, a página visual é limitada ao intervalo válido; ajuste também a página e os dados na aplicação. Não depende do JavaScript do Bootstrap."
+)]
+
+@if (PageCount > 0 && (!HideIfSinglePage || PageCount > 1))
+{
+    <nav @attributes="AdditionalAttributes" aria-label="@Label" class="@ComponentAttributes.Classes(AdditionalAttributes, ClassExtra)">
+        <ul class="pagination flex-wrap mb-0 @SizeClass">
+            <li class="page-item @(Disabled || EffectivePage == 1 ? "disabled" : null)">
+                <button type="button" class="page-link" disabled="@(Disabled || EffectivePage == 1)" aria-label="@PreviousLabel" @onclick="() => Select(EffectivePage - 1)">@PreviousLabel</button>
+            </li>
+            @if (StartPage > 1)
+            {
+                @PageButton(1)
+                @if (StartPage > 2) { <li class="page-item disabled"><span class="page-link" aria-hidden="true">…</span></li> }
+            }
+            @for (long index = StartPage; index <= EndPage; index++)
+            {
+                @PageButton((int)index)
+            }
+            @if (EndPage < PageCount)
+            {
+                @if (EndPage < PageCount - 1) { <li class="page-item disabled"><span class="page-link" aria-hidden="true">…</span></li> }
+                @PageButton(PageCount)
+            }
+            <li class="page-item @(Disabled || EffectivePage == PageCount ? "disabled" : null)">
+                <button type="button" class="page-link" disabled="@(Disabled || EffectivePage == PageCount)" aria-label="@NextLabel" @onclick="Next">@NextLabel</button>
+            </li>
+        </ul>
+    </nav>
+}
+
+@code {
+    [Parameter, ParameterDoc("Quantidade total de páginas. Zero oculta a navegação.")]
+    public int PageCount { get; set; }
+    [Parameter, ParameterDoc("Página atual, começando em 1. Aceita @bind-CurrentPage.")]
+    public int CurrentPage { get; set; } = 1;
+    [Parameter, ParameterDoc("Notifica a página escolhida.")]
+    public EventCallback<int> CurrentPageChanged { get; set; }
+    [Parameter, ParameterDoc("Tamanho da janela de páginas, além dos extremos; maior que zero.")]
+    public int VisiblePages { get; set; } = 5;
+    [Parameter, ParameterDoc("Tamanho visual dos botões.")]
+    public PaginationSize Size { get; set; } = PaginationSize.Medium;
+    [Parameter, ParameterDoc("Desabilita todos os botões, por exemplo durante uma consulta.")]
+    public bool Disabled { get; set; }
+    [Parameter, ParameterDoc("Oculta a navegação quando existe apenas uma página.")]
+    public bool HideIfSinglePage { get; set; } = true;
+    [Parameter, ParameterDoc("Nome acessível da região de navegação.")]
+    public string Label { get; set; } = "Paginação";
+    [Parameter, ParameterDoc("Texto do botão anterior.")]
+    public string PreviousLabel { get; set; } = "Anterior";
+    [Parameter, ParameterDoc("Texto do botão seguinte.")]
+    public string NextLabel { get; set; } = "Próxima";
+    [Parameter, ParameterDoc("Prefixo acessível para os botões numerados.")]
+    public string PageLabel { get; set; } = "Página";
+    [Parameter, ParameterDoc("Classes adicionais da região nav.")]
+    public string? ClassExtra { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML da região nav.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    private int EffectivePage => Math.Clamp(CurrentPage, 1, Math.Max(1, PageCount));
+    private int StartPage => (int)Math.Clamp((long)EffectivePage - VisiblePages / 2, 1, Math.Max(1L, (long)PageCount - VisiblePages + 1));
+    private int EndPage => (int)Math.Min(PageCount, (long)StartPage + VisiblePages - 1);
+    private string? SizeClass => Size switch { PaginationSize.Small => "pagination-sm", PaginationSize.Large => "pagination-lg", _ => null };
+    private RenderFragment PageButton(int page) => @<li class="page-item @(page == EffectivePage ? "active" : null)">
+        <button type="button" class="page-link" disabled="@Disabled" aria-label="@($"{PageLabel} {page}")"
+                aria-current="@(page == EffectivePage ? "page" : null)" @onclick="() => Select(page)">@(page)</button>
+    </li>;
+    private Task Select(int page) => Disabled || page < 1 || page > PageCount || page == EffectivePage
+        ? Task.CompletedTask : CurrentPageChanged.InvokeAsync(page);
+    private Task Next() => EffectivePage < PageCount ? Select(EffectivePage + 1) : Task.CompletedTask;
+    protected override void OnParametersSet()
+    {
+        if (PageCount < 0) throw new ArgumentOutOfRangeException(nameof(PageCount));
+        if (CurrentPage < 1) throw new ArgumentOutOfRangeException(nameof(CurrentPage));
+        if (VisiblePages < 1) throw new ArgumentOutOfRangeException(nameof(VisiblePages));
+    }
+}

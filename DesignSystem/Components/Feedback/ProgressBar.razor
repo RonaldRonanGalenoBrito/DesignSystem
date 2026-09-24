@@ -1,0 +1,54 @@
+@using System.Globalization
+@attribute [ComponentDoc(
+    Slug = "progress-bar",
+    Name = "ProgressBar",
+    Group = "Feedback",
+    Description = "Progresso de uma operação, com percentual, cores e listras.",
+    Code = "<ProgressBar Value=\"65\" Max=\"100\" Label=\"Envio dos arquivos\" ShowLabel Striped />",
+    Guidance = "Value é limitado ao intervalo entre zero e Max. Max deve ser finito e maior que zero. Animated também habilita as listras."
+)]
+
+<div @attributes="AdditionalAttributes" class="@ComponentAttributes.Classes(AdditionalAttributes, "progress", ClassExtra)"
+     role="progressbar" aria-label="@Label" aria-valuenow="@EffectiveValue.ToString(CultureInfo.InvariantCulture)"
+     aria-valuemin="0" aria-valuemax="@Max.ToString(CultureInfo.InvariantCulture)">
+    <div class="progress-bar bg-@Variant.ToString().ToLowerInvariant() @(Striped || Animated ? "progress-bar-striped" : null) @(Animated ? "progress-bar-animated" : null)"
+         style="width: @Percentage.ToString("0.##", CultureInfo.InvariantCulture)%">
+        @if (ShowLabel)
+        {
+            @($"{Percentage:0}%")
+        }
+        @ChildContent
+    </div>
+</div>
+
+@code {
+    [ParameterDoc("Progresso atual, limitado visualmente entre zero e Max.")]
+    [Parameter] public double Value { get; set; }
+    [ParameterDoc("Máximo do progresso; finito e maior que zero.")]
+    [Parameter] public double Max { get; set; } = 100;
+    [ParameterDoc("Nome acessível da operação em progresso.")]
+    [Parameter] public string Label { get; set; } = "Progresso";
+    [ParameterDoc("Variante de cor ou apresentação.")]
+    [Parameter] public ColorVariant Variant { get; set; } = ColorVariant.Primary;
+    [ParameterDoc("Exibe listras na barra.")]
+    [Parameter] public bool Striped { get; set; }
+    [ParameterDoc("Anima as listras da barra.")]
+    [Parameter] public bool Animated { get; set; }
+    [ParameterDoc("Exibe o percentual na barra.")]
+    [Parameter] public bool ShowLabel { get; set; }
+    [ParameterDoc("Conteúdo Razor interno.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    private double EffectiveValue => Math.Clamp(Value, 0, Max);
+    private double Percentage => EffectiveValue / Max * 100;
+    protected override void OnParametersSet()
+    {
+        if (!double.IsFinite(Max) || Max <= 0) throw new ArgumentOutOfRangeException(nameof(Max), "Max must be finite and greater than zero.");
+        if (!double.IsFinite(Value)) throw new ArgumentOutOfRangeException(nameof(Value), "Value must be finite.");
+    }
+}
+
+

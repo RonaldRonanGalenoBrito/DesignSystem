@@ -1,0 +1,35 @@
+<div class="mb-3 @ClassExtra">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <label for="@Id" class="form-label">@Label @if (Required) { <span class="text-danger" aria-hidden="true">*</span> }</label>
+    }
+    @ChildContent
+    @if (!string.IsNullOrWhiteSpace(HelpText))
+    {
+        <div id="@($"{Id}-help")" class="form-text">@HelpText</div>
+    }
+    @if (ErrorMessage is not null)
+    {
+        <div id="@($"{Id}-error")" class="invalid-feedback d-block">@ErrorMessage</div>
+    }
+</div>
+
+@code {
+    [ParameterDoc("Identificador HTML para associar controle, label e mensagens.", Default = "Gerado automaticamente")]
+    [Parameter] public string? Id { get; set; }
+    [ParameterDoc("Rótulo visível ou acessível, conforme o componente.")]
+    [Parameter] public string? Label { get; set; }
+    [ParameterDoc("Aplica required ao HTML; valide também no modelo.")]
+    [Parameter] public bool Required { get; set; }
+    [ParameterDoc("Orientação associada ao campo.")]
+    [Parameter] public string? HelpText { get; set; }
+    [ParameterDoc("Erro externo, com prioridade visual sobre a validação.")]
+    [Parameter] public string? ErrorMessage { get; set; }
+    [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Conteúdo Razor interno.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+}
+
+
+

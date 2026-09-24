@@ -1,0 +1,46 @@
+@attribute [ComponentDoc(
+    Slug = "accordion-item", Name = "AccordionItem", Group = "Conteúdo",
+    Description = "Painel de um acordeão, com título, conteúdo e estado desabilitado.",
+    Code = "<Accordion>\n    <AccordionItem Id=\"shipping\" Title=\"Entrega\">Consulte as opções de entrega.</AccordionItem>\n</Accordion>",
+    Guidance = "Deve estar dentro de Accordion. Informe um Id estável para controlar a abertura por ExpandedIds. TitleContent substitui Title; não coloque controles interativos dentro do título, que já é um botão. Enter e Espaço alternam o painel. HeadingLevel adapta o nível do título à página."
+)]
+
+<div @attributes="AdditionalAttributes" id="@Id" class="@ComponentAttributes.Classes(AdditionalAttributes, "accordion-item", ClassExtra)">
+    <div class="accordion-header" role="heading" aria-level="@HeadingLevel">
+        <button id="@($"{Id}-trigger")" type="button" class="accordion-button @(IsExpanded ? null : "collapsed")"
+                disabled="@Disabled" aria-expanded="@(IsExpanded ? "true" : "false")" aria-controls="@($"{Id}-panel")" @onclick="Toggle">
+            @if (TitleContent is not null) { @TitleContent } else { @Title }
+        </button>
+    </div>
+    <div id="@($"{Id}-panel")" class="accordion-collapse collapse @(IsExpanded ? "show" : null)" hidden="@(!IsExpanded)" aria-labelledby="@($"{Id}-trigger")">
+        <div class="accordion-body">@ChildContent</div>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter] public AccordionContext? Context { get; set; }
+    [Parameter, ParameterDoc("ID estável e único na página. Usado pelo ExpandedIds do Accordion.", Default = "Gerado automaticamente")]
+    public string Id { get; set; } = $"accordion-{Guid.NewGuid():N}";
+    [Parameter, ParameterDoc("Texto do botão que abre e fecha o painel.")]
+    public string? Title { get; set; }
+    [Parameter, ParameterDoc("Título personalizado, sem elementos interativos.")]
+    public RenderFragment? TitleContent { get; set; }
+    [Parameter, ParameterDoc("Conteúdo do painel, preservado enquanto fechado.")]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter, ParameterDoc("Impede alternar este painel pela interface.")]
+    public bool Disabled { get; set; }
+    [Parameter, ParameterDoc("Nível semântico do título, de 1 a 6.")]
+    public int HeadingLevel { get; set; } = 2;
+    [Parameter, ParameterDoc("Classes adicionais do painel.")]
+    public string? ClassExtra { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML do painel externo.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    private bool IsExpanded => Context?.ExpandedIds.Contains(Id) == true;
+    private Task Toggle() => Disabled ? Task.CompletedTask : Context!.Toggle(Id);
+    protected override void OnParametersSet()
+    {
+        if (Context is null) throw new InvalidOperationException("AccordionItem deve estar dentro de Accordion.");
+        if (string.IsNullOrWhiteSpace(Id) || Id.Any(char.IsWhiteSpace)) throw new ArgumentException("Id deve ser preenchido e não conter espaços.");
+        if (HeadingLevel is < 1 or > 6) throw new ArgumentOutOfRangeException(nameof(HeadingLevel));
+    }
+}

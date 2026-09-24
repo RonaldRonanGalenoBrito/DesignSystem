@@ -1,0 +1,98 @@
+@page "/componentes/{Slug}"
+
+@if (entry is null)
+{
+    <PageTitle>Componente não encontrado</PageTitle>
+    <h1>Componente não encontrado</h1>
+    <p>Consulte o <a href="">catálogo de componentes</a>.</p>
+}
+else
+{
+    <PageTitle>@entry.Name · Manual de componentes</PageTitle>
+    <div class="doc-page">
+        <article class="doc-article">
+            <div class="eyebrow">@entry.Group / Componentes</div>
+            <h1>@entry.Name</h1>
+            <p class="doc-lead">@entry.Description</p>
+            <div class="doc-meta"><span>Blazor</span><span>Bootstrap 5.3</span><span>@(entry.ComponentType.IsGenericType ? $"Componente genérico · {string.Join(", ", entry.ComponentType.GetGenericTypeDefinition().GetGenericArguments().Select(type => type.Name))}" : "Componente Razor")</span></div>
+            <section id="exemplos" class="doc-section">
+                <h2>Exemplos</h2>
+                <p class="text-body-secondary">Experimente o componente abaixo. O código Razor pode ser copiado para seu projeto.</p>
+                <Showcase Entry="@entry" @key="entry.Slug" />
+                @if (!string.IsNullOrWhiteSpace(entry.Code))
+                {
+                    <details class="mt-3">
+                        <summary>Exemplo declarado no componente</summary>
+                        <CodeExample Code="@entry.Code" />
+                    </details>
+                }
+            </section>
+            <section id="uso" class="doc-section">
+                <h2>Uso e comportamento</h2>
+                <div class="usage-note">@entry.Guidance</div>
+                <h3>Namespace</h3>
+                <pre class="install-code"><code>@($"@using {entry.ComponentType.Namespace}")</code></pre>
+                <p class="small text-body-secondary mt-2">Adicione também <code>@@using DesignSystem.Enums</code>. Eventos e binding precisam de um render mode interativo configurado na aplicação.</p>
+                @if (entry.Group == "Formulários")
+                {
+                    <h3>Validação com EditForm</h3>
+                    <p>Deixe o campo vazio e envie para conferir o erro. Dentro de EditForm, use <code>@@bind-Value</code> ou informe ValueExpression explicitamente.</p>
+                    <ValidationExample @key="entry.Slug" />
+                }
+            </section>
+            <section id="estilos" class="doc-section">
+                <h2>Estilos e personalização</h2>
+                <p>Use <code>ClassExtra</code> e os utilitários Bootstrap para espaçamento, bordas e cores. Atributos <code>class</code> adicionais são combinados com as classes do componente.</p>
+                @if (entry.Group == "Formulários")
+                {
+                    <p><code>ClassExtra</code> estiliza o contêiner; <code>class</code> estiliza o controle. Use <code>Disabled</code>, <code>ErrorMessage</code> e, nos campos de texto, <code>Readonly</code> para configurar o estado.</p>
+                }
+                @if (entry.Slug is "badge" or "alert" or "button" or "spinner" or "progress-bar")
+                {
+                    <p>As opções de cor e estado podem ser testadas nos controles acima do exemplo. Veja todos os valores aceitos por cada enum na referência abaixo.</p>
+                }
+                @if (entry.Group == "Layout")
+                {
+                    <p>Carregue <code>NomeDaSuaAplicacao.styles.css</code> no host para incluir o CSS isolado. A largura do menu pode ser ajustada com <code>--app-sidebar-width: 19rem</code> no AppShell.</p>
+                }
+                <p class="small text-body-secondary">O alternador no header permite conferir a aparência em tema claro e escuro. As cores seguem as variáveis do Bootstrap.</p>
+            </section>
+            <section id="parametros" class="doc-section">
+                <h2>Referência de parâmetros</h2>
+                <p class="text-body-secondary small">Nomes, tipos, valores padrão e opções de enums são obtidos diretamente do componente compilado. Inclui parâmetros herdados. Tipos de referência podem aceitar null; consulte a coluna Padrão.</p>
+                @if (entry.ComponentType.IsGenericType)
+                {
+                    <p class="small text-body-secondary">Os padrões refletem a especialização configurada em ComponentDoc.TypeArguments. Os tipos da API preservam os nomes genéricos, como TValue.</p>
+                }
+                <div class="table-responsive">
+                    <table class="table api-table align-top">
+                        <caption class="visually-hidden">Parâmetros de @entry.Name</caption>
+                        <thead><tr><th scope="col">Parâmetro</th><th scope="col">Tipo</th><th scope="col">Padrão</th><th scope="col">Descrição</th></tr></thead>
+                        <tbody>
+                            @foreach (var row in parameters)
+                            {
+                                <tr><td><code>@row.Name</code></td><td><code>@row.Type</code></td><td><code>@row.Default</code></td><td>@row.Description @if (row.Options is not null) { <div class="mt-2"><strong>Opções:</strong> <code>@row.Options</code></div> }</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <footer class="border-top mt-5 pt-3 small text-body-secondary">Exemplos executados com a biblioteca deste repositório. <a href="">Voltar à introdução</a></footer>
+        </article>
+        <aside class="doc-toc" aria-label="Nesta página">
+            <strong>Nesta página</strong>
+            <a href="@($"componentes/{Slug}#exemplos")">Exemplos</a><a href="@($"componentes/{Slug}#uso")">Uso e comportamento</a><a href="@($"componentes/{Slug}#estilos")">Estilos</a><a href="@($"componentes/{Slug}#parametros")">Parâmetros</a>
+        </aside>
+    </div>
+}
+
+@code {
+    [Parameter] public string Slug { get; set; } = "";
+    private ComponentEntry? entry;
+    private IReadOnlyList<ParameterRow> parameters = [];
+    protected override void OnParametersSet()
+    {
+        entry = Catalog.All.FirstOrDefault(item => item.Slug == Slug);
+        parameters = entry is null ? [] : ParameterReference.For(entry.ComponentType);
+    }
+}

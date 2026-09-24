@@ -1,0 +1,32 @@
+@typeparam TValue
+@inherits FormFieldBase<TValue>
+@attribute [ComponentDoc(
+    Slug = "form-select",
+    TypeArguments = new[] { typeof(int?) },
+    Name = "FormSelect",
+    Group = "Formulários",
+    Description = "Seleção tipada com suporte a enums e valores anuláveis.",
+    Code = "<FormSelect TValue=\"int?\" Label=\"Prioridade\" @bind-Value=\"priority\" Placeholder=\"Selecione\">\n    <option value=\"1\">Normal</option>\n    <option value=\"2\">Alta</option>\n</FormSelect>\n\n@code {\n    private int? priority;\n}",
+    Guidance = "Use um tipo anulável para representar a ausência de seleção. Opções inválidas preservam o valor anterior e geram erro de validação no EditForm. Seleção múltipla não é suportada."
+)]
+<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra">
+    <InputSelect TValue="TValue" @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-select")"
+        Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+        disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy">
+        @if (!string.IsNullOrWhiteSpace(Placeholder))
+        {
+            <option value="">@Placeholder</option>
+        }
+        @ChildContent
+    </InputSelect>
+</FieldLayout>
+
+@code {
+    [ParameterDoc("Conteúdo Razor interno.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Texto de orientação ou opção vazia do select.")]
+    [Parameter] public string? Placeholder { get; set; }
+}
+
+
+

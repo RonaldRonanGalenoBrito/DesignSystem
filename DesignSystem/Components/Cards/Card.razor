@@ -1,0 +1,82 @@
+@attribute [ComponentDoc(
+    Slug = "card",
+    Name = "Card",
+    Group = "Conteúdo",
+    Description = "Agrupe conteúdo com título, subtítulo e áreas de cabeçalho e rodapé.",
+    Code = "<Card Title=\"Resumo do projeto\" Subtitle=\"Atualizado hoje\" Shadow>\n    <ChildContent>As informações mais importantes em um só lugar.</ChildContent>\n    <FooterContent>Última atualização: agora</FooterContent>\n</Card>",
+    Guidance = "HeaderContent substitui Title e Subtitle. BodyClass, HeaderClass e FooterClass permitem aplicar utilitários Bootstrap a cada área."
+)]
+
+<div @attributes="AdditionalAttributes" class="@GetCssClasses()">
+    @if (HeaderContent != null || !string.IsNullOrEmpty(Title))
+    {
+        <div class="card-header @HeaderClass">
+            @if (HeaderContent != null)
+            {
+                @HeaderContent
+            }
+            else
+            {
+                <h5 class="card-title mb-0">@Title</h5>
+                @if (!string.IsNullOrEmpty(Subtitle))
+                {
+                    <h6 class="card-subtitle text-muted mt-1 mb-0">@Subtitle</h6>
+                }
+            }
+        </div>
+    }
+
+    <div class="card-body @BodyClass">
+        @ChildContent
+    </div>
+
+    @if (FooterContent != null)
+    {
+        <div class="card-footer @FooterClass">
+            @FooterContent
+        </div>
+    }
+</div>
+
+@code {
+    [ParameterDoc("Conteúdo Razor interno.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Conteúdo personalizado do cabeçalho.")]
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [ParameterDoc("Conteúdo personalizado do rodapé.")]
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+
+    [ParameterDoc("Título exibido.")]
+
+    [Parameter] public string? Title { get; set; }
+    [ParameterDoc("Texto secundário do cabeçalho.")]
+    [Parameter] public string? Subtitle { get; set; }
+
+    [ParameterDoc("Aplica a sombra Bootstrap shadow-sm.")]
+
+    [Parameter] public bool Shadow { get; set; } = true;
+    [ParameterDoc("Classes do cabeçalho do card.")]
+    [Parameter] public string? HeaderClass { get; set; }
+    [ParameterDoc("Classes do corpo do card.")]
+    [Parameter] public string? BodyClass { get; set; }
+    [ParameterDoc("Classes do rodapé do card.")]
+    [Parameter] public string? FooterClass { get; set; }
+    [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
+    [Parameter] public string? ClassExtra { get; set; }
+
+    [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string GetCssClasses()
+    {
+        var classes = new List<string> { "card" };
+
+        if (Shadow) classes.Add("shadow-sm");
+        if (!string.IsNullOrWhiteSpace(ClassExtra)) classes.Add(ClassExtra);
+
+        return ComponentAttributes.Classes(AdditionalAttributes, classes.ToArray());
+    }
+}
+

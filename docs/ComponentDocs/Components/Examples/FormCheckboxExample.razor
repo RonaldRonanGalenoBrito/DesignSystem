@@ -1,0 +1,13 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormCheckbox))]
+
+<CodeExample Code="@Code">
+<FormCheckbox Label="Receber notificações" @bind-Value="enabled" IsSwitch />
+<p class="small text-body-secondary mb-0">Valor: @(enabled ? "true" : "false")</p>
+</CodeExample>
+
+@code {
+    private bool enabled;
+    private string Code => Entry.Code;
+}
+

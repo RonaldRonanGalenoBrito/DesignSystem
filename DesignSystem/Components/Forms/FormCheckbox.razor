@@ -1,0 +1,38 @@
+@inherits FormFieldBase<bool>
+@attribute [ComponentDoc(
+    Slug = "form-checkbox",
+    Name = "FormCheckbox",
+    Group = "Formulários",
+    Description = "Opções booleanas com apresentação de checkbox ou switch.",
+    Code = "<FormCheckbox Label=\"Receber notificações\" @bind-Value=\"enabled\" IsSwitch />\n\n@code {\n    private bool enabled;\n}",
+    Guidance = "IsSwitch muda apenas a apresentação. Para exigir valor true no modelo, use uma regra específica: Required sozinho não rejeita false."
+)]
+
+<div class="mb-3 @ClassExtra">
+    <div class="form-check @(IsSwitch ? "form-switch" : null)">
+        <InputCheckbox @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-check-input")"
+                       Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                       disabled="@Disabled" required="@Required" role="@(IsSwitch ? "switch" : null)"
+                       aria-invalid="@Invalid" aria-describedby="@DescribedBy" />
+        @if (!string.IsNullOrWhiteSpace(Label))
+        {
+            <label class="form-check-label" for="@Id">@Label</label>
+        }
+    </div>
+    @if (!string.IsNullOrWhiteSpace(HelpText))
+    {
+        <div id="@($"{Id}-help")" class="form-text">@HelpText</div>
+    }
+    @if (ValidationError is not null)
+    {
+        <div id="@($"{Id}-error")" class="invalid-feedback d-block">@ValidationError</div>
+    }
+</div>
+
+@code {
+    [ParameterDoc("Apresenta o checkbox como interruptor.")]
+    [Parameter] public bool IsSwitch { get; set; }
+}
+
+
+

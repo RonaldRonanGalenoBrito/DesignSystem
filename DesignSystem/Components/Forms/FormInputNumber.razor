@@ -1,0 +1,27 @@
+@typeparam TValue
+@inherits FormFieldBase<TValue>
+@attribute [ComponentDoc(
+    Slug = "form-input-number",
+    TypeArguments = new[] { typeof(decimal?) },
+    Name = "FormInputNumber",
+    Group = "Formulários",
+    Description = "Entrada numérica tipada com conversão e mensagens de erro.",
+    Code = "<FormInputNumber TValue=\"decimal?\" Label=\"Valor\" @bind-Value=\"amount\" min=\"0\" step=\"0.01\" />\n\n@code {\n    private decimal? amount;\n}",
+    Guidance = "TValue aceita os tipos do InputNumber do Blazor, como int, long, float, double e decimal, inclusive anuláveis. min, max e step são atributos HTML; valide regras de negócio também no modelo."
+)]
+
+<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra">
+    <InputNumber TValue="TValue" @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
+        Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+        disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" readonly="@Readonly" ParsingErrorMessage="@ParsingErrorMessage" />
+</FieldLayout>
+
+@code {
+    [ParameterDoc("Impede alteração do valor pelo usuário.")]
+    [Parameter] public bool Readonly { get; set; }
+    [ParameterDoc("Mensagem de conversão inválida; {0} recebe o nome do campo.")]
+    [Parameter] public string ParsingErrorMessage { get; set; } = "O campo {0} deve conter um número válido.";
+}
+
+
+

@@ -1,0 +1,33 @@
+.app-shell {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr;
+    grid-template-areas: "header" "sidebar" "page";
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-body-color);
+}
+.app-shell-header { grid-area: header; position: sticky; top: 0; z-index: 1020; }
+.app-shell-body { display: contents; }
+.app-shell-sidebar { grid-area: sidebar; display: none; background: var(--bs-body-bg); }
+.app-shell-sidebar.is-open { display: flex; flex-direction: column; }
+.app-shell-page { grid-area: page; display: flex; flex-direction: column; min-width: 0; }
+.app-shell-page main { flex: 1; overflow-wrap: anywhere; }
+@media (min-width: 992px) {
+    .app-shell { grid-template-rows: auto 1fr; grid-template-areas: "header" "page"; }
+    .app-shell.has-sidebar {
+        grid-template-columns: var(--app-sidebar-width, 17rem) minmax(0, 1fr);
+        grid-template-areas: "sidebar header" "sidebar page";
+    }
+    .app-shell-sidebar {
+        display: flex;
+        flex-direction: column;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        height: 100dvh;
+        overflow-y: auto;
+        align-self: start;
+    }
+}

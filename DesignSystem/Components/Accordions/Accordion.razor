@@ -1,0 +1,53 @@
+@attribute [ComponentDoc(
+    Slug = "accordion", Name = "Accordion", Group = "Conteúdo",
+    Description = "Agrupa painéis expansíveis, com abertura única ou múltipla.",
+    Code = "<Accordion>\n    <AccordionItem Id=\"details\" Title=\"Detalhes\">Conteúdo do painel.</AccordionItem>\n    <AccordionItem Id=\"help\" Title=\"Ajuda\">Como podemos ajudar?</AccordionItem>\n</Accordion>",
+    Guidance = "Use AccordionItem como conteúdo, com IDs únicos na página. AllowMultiple permite vários painéis abertos. ExpandedIds aceita binding para controlar a expansão. O primeiro ID informado prevalece no modo único. O conteúdo fechado permanece montado, preservando o estado. A expansão é imediata, sem animação nem JavaScript do Bootstrap."
+)]
+
+<div @attributes="AdditionalAttributes" class="@ComponentAttributes.Classes(AdditionalAttributes, "accordion", Flush ? "accordion-flush" : null, ClassExtra)">
+    <CascadingValue Value="@Context">@ChildContent</CascadingValue>
+</div>
+
+@code {
+    [Parameter, ParameterDoc("Painéis AccordionItem que compõem o acordeão.")]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter, ParameterDoc("Permite manter mais de um painel aberto.")]
+    public bool AllowMultiple { get; set; }
+    [Parameter, ParameterDoc("Remove bordas externas e arredondamento.")]
+    public bool Flush { get; set; }
+    [Parameter, ParameterDoc("IDs dos painéis abertos. Aceita @bind-ExpandedIds.", Default = "Coleção vazia")]
+    public IReadOnlyCollection<string> ExpandedIds { get; set; } = Array.Empty<string>();
+    [Parameter, ParameterDoc("Notifica a coleção completa de IDs abertos após uma interação.")]
+    public EventCallback<IReadOnlyCollection<string>> ExpandedIdsChanged { get; set; }
+    [Parameter, ParameterDoc("Classes adicionais do acordeão.")]
+    public string? ClassExtra { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML do contêiner.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    private HashSet<string> expanded = new(StringComparer.Ordinal);
+    private HashSet<string>? previous;
+    private AccordionContext Context => new(expanded, Toggle);
+    protected override void OnParametersSet()
+    {
+        ArgumentNullException.ThrowIfNull(ExpandedIds);
+        if (ExpandedIds.Any(string.IsNullOrWhiteSpace)) throw new ArgumentException("ExpandedIds não aceita IDs vazios.");
+        if (previous is null || !previous.SetEquals(ExpandedIds))
+        {
+            expanded = new(ExpandedIds, StringComparer.Ordinal);
+            previous = new(ExpandedIds, StringComparer.Ordinal);
+        }
+        if (!AllowMultiple && expanded.Count > 1) expanded = new([expanded.First()], StringComparer.Ordinal);
+    }
+    private async Task Toggle(string id)
+    {
+        var next = new HashSet<string>(expanded, StringComparer.Ordinal);
+        if (!next.Remove(id))
+        {
+            if (!AllowMultiple) next.Clear();
+            next.Add(id);
+        }
+        expanded = next;
+        await ExpandedIdsChanged.InvokeAsync(Array.AsReadOnly(next.ToArray()));
+        await InvokeAsync(StateHasChanged);
+    }
+}

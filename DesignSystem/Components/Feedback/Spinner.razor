@@ -1,0 +1,31 @@
+@attribute [ComponentDoc(
+    Slug = "spinner",
+    Name = "Spinner",
+    Group = "Feedback",
+    Description = "Indicadores de carregamento com texto acessível e duas animações.",
+    Code = "<Spinner Variant=\"ColorVariant.Primary\" Label=\"Carregando pedidos...\" />",
+    Guidance = "Use Label para explicar o que está sendo carregado. Small reduz o tamanho; Grow troca o círculo pela animação de expansão."
+)]
+
+<span @attributes="AdditionalAttributes" role="status"
+      class="@ComponentAttributes.Classes(AdditionalAttributes, SpinnerClass, Small ? $"{SpinnerClass}-sm" : null, $"text-{Variant.ToString().ToLowerInvariant()}", ClassExtra)">
+    <span class="visually-hidden">@Label</span>
+</span>
+
+@code {
+    [ParameterDoc("Variante de cor ou apresentação.")]
+    [Parameter] public ColorVariant Variant { get; set; } = ColorVariant.Primary;
+    [ParameterDoc("Usa o spinner pequeno.")]
+    [Parameter] public bool Small { get; set; }
+    [ParameterDoc("Usa a animação spinner-grow.")]
+    [Parameter] public bool Grow { get; set; }
+    [ParameterDoc("Texto de carregamento anunciado aos leitores de tela.")]
+    [Parameter] public string Label { get; set; } = "Carregando...";
+    [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    private string SpinnerClass => Grow ? "spinner-grow" : "spinner-border";
+}
+
+

@@ -1,0 +1,6 @@
+.sidebar {
+    flex: 1;
+    background-color: var(--sidebar-bg, var(--bs-body-bg));
+    color: var(--sidebar-color, var(--bs-body-color));
+}
+
