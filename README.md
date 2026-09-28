@@ -32,6 +32,7 @@ No `_Imports.razor` da aplicação:
 @using SIDEB.DesignSystem.Components.Tables
 @using SIDEB.DesignSystem.Components.Navigation
 @using SIDEB.DesignSystem.Components.Accordions
+@using DesignSystem.Components.Grid
 ```
 
 ## Componentes
@@ -58,6 +59,7 @@ Para header, menu lateral e estrutura de páginas, consulte o [guia de layouts](
 | Table&lt;TItem&gt; | Linhas por template, cabeçalho, rodapé, responsividade, estilos, carregamento e estado vazio |
 | Pagination | Binding de página, janela de páginas, reticências, tamanhos e estado desabilitado |
 | Accordion / AccordionItem | Painéis únicos ou múltiplos, binding da expansão e estilo flush |
+| Row / Column | Grid responsivo Bootstrap, espaçamentos, larguras e deslocamentos por breakpoint |
 
 A tabela recebe os itens que devem aparecer e um `RowTemplate` com as células (`td`). O exemplo do manual combina `Table<TItem>` com `Pagination` usando `Skip` e `Take`; a aplicação controla a consulta, ordenação e filtragem dos dados. Informe `ColumnCount` para os estados vazio e de carregamento ocuparem todas as colunas.
 

@@ -1,0 +1,65 @@
+@attribute [ComponentDoc(
+    Slug = "column",
+    Name = "Column",
+    Group = "Layout",
+    Description = "Coluna responsiva do grid Bootstrap com larguras e deslocamentos por breakpoint.",
+    Code = "<Row Gutter=\"3\">\n    <Column Size=\"12\" Md=\"8\">Conteúdo principal</Column>\n    <Column Size=\"12\" Md=\"4\">Complemento</Column>\n</Row>",
+    Guidance = "Size vale para todos os tamanhos; Sm, Md, Lg, Xl e Xxl sobrescrevem a largura nos breakpoints Bootstrap. Cada largura e Offset correspondente deve ficar entre 1 e 12. Sem largura, a coluna divide o espaço disponível automaticamente."
+)]
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter, ParameterDoc("Conteúdo Razor interno da coluna.")]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter, ParameterDoc("Largura de 1 a 12 em todos os tamanhos de tela.")]
+    public int? Size { get; set; }
+    [Parameter, ParameterDoc("Largura de 1 a 12 a partir de 576 px.")]
+    public int? Sm { get; set; }
+    [Parameter, ParameterDoc("Largura de 1 a 12 a partir de 768 px.")]
+    public int? Md { get; set; }
+    [Parameter, ParameterDoc("Largura de 1 a 12 a partir de 992 px.")]
+    public int? Lg { get; set; }
+    [Parameter, ParameterDoc("Largura de 1 a 12 a partir de 1200 px.")]
+    public int? Xl { get; set; }
+    [Parameter, ParameterDoc("Largura de 1 a 12 a partir de 1400 px.")]
+    public int? Xxl { get; set; }
+    [Parameter, ParameterDoc("Deslocamento de 1 a 12 em todos os tamanhos de tela.")]
+    public int? Offset { get; set; }
+    [Parameter, ParameterDoc("Deslocamento de 1 a 12 a partir de 576 px.")]
+    public int? OffsetSm { get; set; }
+    [Parameter, ParameterDoc("Deslocamento de 1 a 12 a partir de 768 px.")]
+    public int? OffsetMd { get; set; }
+    [Parameter, ParameterDoc("Deslocamento de 1 a 12 a partir de 992 px.")]
+    public int? OffsetLg { get; set; }
+    [Parameter, ParameterDoc("Deslocamento de 1 a 12 a partir de 1200 px.")]
+    public int? OffsetXl { get; set; }
+    [Parameter, ParameterDoc("Deslocamento de 1 a 12 a partir de 1400 px.")]
+    public int? OffsetXxl { get; set; }
+    [Parameter, ParameterDoc("Classes CSS adicionais aplicadas à coluna.")]
+    public string? ClassExtra { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML adicionais da coluna.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string CssClass => ComponentAttributes.Classes(AdditionalAttributes,
+        WidthClass(null, Size), WidthClass("sm", Sm), WidthClass("md", Md), WidthClass("lg", Lg), WidthClass("xl", Xl), WidthClass("xxl", Xxl),
+        OffsetClass(null, Offset), OffsetClass("sm", OffsetSm), OffsetClass("md", OffsetMd), OffsetClass("lg", OffsetLg), OffsetClass("xl", OffsetXl), OffsetClass("xxl", OffsetXxl),
+        HasWidth ? null : "col", ClassExtra);
+
+    private bool HasWidth => Size is not null || Sm is not null || Md is not null || Lg is not null || Xl is not null || Xxl is not null;
+
+    protected override void OnParametersSet()
+    {
+        Validate(Size, nameof(Size)); Validate(Sm, nameof(Sm)); Validate(Md, nameof(Md)); Validate(Lg, nameof(Lg)); Validate(Xl, nameof(Xl)); Validate(Xxl, nameof(Xxl));
+        Validate(Offset, nameof(Offset)); Validate(OffsetSm, nameof(OffsetSm)); Validate(OffsetMd, nameof(OffsetMd)); Validate(OffsetLg, nameof(OffsetLg)); Validate(OffsetXl, nameof(OffsetXl)); Validate(OffsetXxl, nameof(OffsetXxl));
+    }
+
+    private static string? WidthClass(string? breakpoint, int? value) => value is null ? null : breakpoint is null ? $"col-{value}" : $"col-{breakpoint}-{value}";
+    private static string? OffsetClass(string? breakpoint, int? value) => value is null ? null : breakpoint is null ? $"offset-{value}" : $"offset-{breakpoint}-{value}";
+    private static void Validate(int? value, string name)
+    {
+        if (value is < 1 or > 12) throw new ArgumentOutOfRangeException(name, "A largura e o deslocamento devem estar entre 1 e 12.");
+    }
+}

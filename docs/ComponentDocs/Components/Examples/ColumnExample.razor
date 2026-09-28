@@ -1,0 +1,14 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Column))]
+
+<CodeExample Code="@Code">
+    <Row Gutter="3">
+        <Column Size="12" Md="8"><div class="border rounded p-3 bg-body-tertiary">Conteúdo principal</div></Column>
+        <Column Size="12" Md="4"><div class="border rounded p-3 bg-body-tertiary">Complemento</div></Column>
+        <Column Size="12" Md="6" OffsetMd="3"><div class="border rounded p-3 bg-body-tertiary">Coluna centralizada</div></Column>
+    </Row>
+</CodeExample>
+
+@code {
+    private string Code => Entry.Code;
+}

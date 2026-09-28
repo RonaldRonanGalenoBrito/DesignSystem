@@ -1,0 +1,48 @@
+@attribute [ComponentDoc(
+    Slug = "row",
+    Name = "Row",
+    Group = "Layout",
+    Description = "Linha responsiva do grid Bootstrap para organizar colunas.",
+    Code = "<Row GutterX=\"3\" GutterY=\"3\">\n    <Column Md=\"6\">Esquerda</Column>\n    <Column Md=\"6\">Direita</Column>\n</Row>",
+    Guidance = "Use Column como conteúdo. Gutter, GutterX e GutterY aceitam valores de 0 a 5; Gutter substitui os dois valores específicos. As larguras responsivas ficam em Column."
+)]
+
+<div @attributes="AdditionalAttributes" class="@CssClass">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter, ParameterDoc("Colunas e demais conteúdo da linha.")]
+    public RenderFragment? ChildContent { get; set; }
+    [Parameter, ParameterDoc("Espaçamento horizontal e vertical entre colunas, de 0 a 5.")]
+    public int? Gutter { get; set; }
+    [Parameter, ParameterDoc("Espaçamento horizontal entre colunas, de 0 a 5.")]
+    public int? GutterX { get; set; }
+    [Parameter, ParameterDoc("Espaçamento vertical entre colunas, de 0 a 5.")]
+    public int? GutterY { get; set; }
+    [Parameter, ParameterDoc("Classes CSS adicionais aplicadas à linha.")]
+    public string? ClassExtra { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML adicionais da linha.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string CssClass => ComponentAttributes.Classes(
+        AdditionalAttributes,
+        "row",
+        GutterClass("g", Gutter),
+        Gutter is null ? GutterClass("gx", GutterX) : null,
+        Gutter is null ? GutterClass("gy", GutterY) : null,
+        ClassExtra);
+
+    protected override void OnParametersSet()
+    {
+        ValidateGutter(Gutter, nameof(Gutter));
+        ValidateGutter(GutterX, nameof(GutterX));
+        ValidateGutter(GutterY, nameof(GutterY));
+    }
+
+    private static string? GutterClass(string prefix, int? value) => value is null ? null : $"{prefix}-{value}";
+    private static void ValidateGutter(int? value, string name)
+    {
+        if (value is < 0 or > 5) throw new ArgumentOutOfRangeException(name, "O espaçamento deve estar entre 0 e 5.");
+    }
+}

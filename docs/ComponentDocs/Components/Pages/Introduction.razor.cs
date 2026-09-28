@@ -24,6 +24,7 @@ public partial class Introduction
         @using DesignSystem.Components.Tables
         @using DesignSystem.Components.Navigation
         @using DesignSystem.Components.Accordions
+        @using DesignSystem.Components.Grid
         """;
 
 }
