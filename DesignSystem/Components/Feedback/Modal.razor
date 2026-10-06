@@ -1,0 +1,113 @@
+@attribute [ComponentDoc(
+    Slug = "modal",
+    Name = "Modal",
+    Group = "Feedback",
+    Description = "Janela modal controlada por estado Blazor, com cabeçalho e rodapé opcionais.",
+    Code = "<Button OnClick=\"@(() => modalAberto = true)\">Excluir</Button>\n\n<Modal Title=\"Confirmar exclusão\" @bind-IsOpen=\"modalAberto\">\n    <ChildContent>Esta ação não poderá ser desfeita.</ChildContent>\n    <FooterContent>\n        <Button Variant=\"ButtonVariant.OutlineSecondary\" OnClick=\"@(() => modalAberto = false)\">Cancelar</Button>\n        <Button Variant=\"ButtonVariant.Danger\">Excluir</Button>\n    </FooterContent>\n</Modal>\n\n@code { private bool modalAberto; }",
+    Guidance = "Controle a abertura com @bind-IsOpen. O clique fora do diálogo fecha por padrão; use CloseOnBackdropClick=false para exigir uma ação explícita. O componente usa classes Bootstrap, sem depender do JavaScript do Bootstrap."
+)]
+
+@if (isOpen)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div @attributes="AdditionalAttributes" class="@ModalClasses"
+         tabindex="-1" role="dialog" aria-modal="true" aria-label="@AccessibleLabel" @onclick="HandleBackdropClick">
+        <div class="@DialogClasses" @onclick:stopPropagation="true">
+            <div class="modal-content">
+                @if (HeaderContent is not null || !string.IsNullOrWhiteSpace(Title) || ShowCloseButton)
+                {
+                    <div class="modal-header">
+                        @if (HeaderContent is not null)
+                        {
+                            @HeaderContent
+                        }
+                        else if (!string.IsNullOrWhiteSpace(Title))
+                        {
+                            <h1 class="modal-title fs-5">@Title</h1>
+                        }
+                        @if (ShowCloseButton)
+                        {
+                            <button type="button" class="btn-close" aria-label="@CloseLabel" @onclick="Close"></button>
+                        }
+                    </div>
+                }
+                <div class="modal-body">@ChildContent</div>
+                @if (FooterContent is not null)
+                {
+                    <div class="modal-footer">@FooterContent</div>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [ParameterDoc("Título exibido no cabeçalho padrão.")]
+    [Parameter] public string? Title { get; set; }
+    [ParameterDoc("Conteúdo personalizado do cabeçalho; substitui o título padrão.")]
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [ParameterDoc("Conteúdo principal do diálogo.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Conteúdo personalizado do rodapé.")]
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [ParameterDoc("Indica se o diálogo está aberto; aceita @bind-IsOpen.")]
+    [Parameter] public bool IsOpen { get; set; }
+    [ParameterDoc("Notifica a mudança de abertura do diálogo.")]
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [ParameterDoc("Exibe o botão X no cabeçalho.")]
+    [Parameter] public bool ShowCloseButton { get; set; } = true;
+    [ParameterDoc("Fecha o diálogo ao clicar fora do conteúdo.")]
+    [Parameter] public bool CloseOnBackdropClick { get; set; } = true;
+    [ParameterDoc("Tamanho do diálogo.")]
+    [Parameter] public ModalSize Size { get; set; }
+    [ParameterDoc("Centraliza verticalmente o diálogo.")]
+    [Parameter] public bool Centered { get; set; }
+    [ParameterDoc("Mantém cabeçalho e rodapé visíveis quando o conteúdo tem rolagem.")]
+    [Parameter] public bool Scrollable { get; set; }
+    [ParameterDoc("Texto acessível do diálogo quando não houver título.")]
+    [Parameter] public string AccessibleLabel { get; set; } = "Caixa de diálogo";
+    [ParameterDoc("Texto acessível do botão de fechar.")]
+    [Parameter] public string CloseLabel { get; set; } = "Fechar";
+    [ParameterDoc("Classes CSS adicionais aplicadas ao elemento modal.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Notifica que o diálogo foi fechado por uma ação interna.")]
+    [Parameter] public EventCallback OnClosed { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML do elemento modal.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool isOpen;
+    private bool? previousIsOpen;
+
+    private string ModalClasses => ComponentAttributes.Classes(AdditionalAttributes, "modal fade show d-block", ClassExtra);
+
+    private string DialogClasses => ComponentAttributes.Classes(null,
+        "modal-dialog",
+        Size switch
+        {
+            ModalSize.Small => "modal-sm",
+            ModalSize.Large => "modal-lg",
+            ModalSize.ExtraLarge => "modal-xl",
+            _ => null
+        },
+        Centered ? "modal-dialog-centered" : null,
+        Scrollable ? "modal-dialog-scrollable" : null);
+
+    protected override void OnParametersSet()
+    {
+        if (previousIsOpen != IsOpen)
+            isOpen = IsOpen;
+        previousIsOpen = IsOpen;
+    }
+
+    private Task HandleBackdropClick() => CloseOnBackdropClick ? Close() : Task.CompletedTask;
+
+    private async Task Close()
+    {
+        if (!isOpen) return;
+
+        isOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+        await OnClosed.InvokeAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+}

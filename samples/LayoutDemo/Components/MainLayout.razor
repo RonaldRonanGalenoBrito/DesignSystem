@@ -1,0 +1,47 @@
+@inherits LayoutComponentBase
+
+<AppShell>
+    <HeaderContent>
+        <Header>
+            <BrandContent>
+                <h5 class="mb-0">Certidão Negativa de Débitos</h5>
+            </BrandContent>
+            <Actions>
+                <span class="d-flex gap-1 ps-3 ms-2 text-body-secondary">
+                    Visitante
+                    <span class="d-flex justify-content-center bg-secondary text-light rounded-circle" style="width: 24px;">
+                        V
+                    </span>
+                </span>
+            </Actions>
+        </Header>
+    </HeaderContent>
+    <SidebarContent>
+        <Sidebar BackgroundColor="#1b6098" TextColor="#ffffff" ItemTextColor="#ffffff" ItemHoverBackgroundColor="#ffffff" ItemHoverTextColor="#1b6098" ItemActiveBackgroundColor="#ffffff" ItemActiveTextColor="#1b6098">
+            <HeaderContent>
+                <section class="d-flex gap-2 mb-1">
+                    <div>
+                        <div class="bg-light p-1 px-2" style="margin-left: -5px; border-radius: 0 47% 47% 0">
+                            <img src="images/BRASAO_GOV_SP_Original.svg" style="width: 40px; height: 45px;" alt="Brasão da Secretaria da Fazenda e Planejamento e Procuradoria Geral do Estado de São Paulo">
+                        </div>
+                    </div>
+                    <span style="font-size: 14px;">
+                        Secretaria da Fazenda e Planejamento e Procuradoria Geral do Estado de São Paulo
+                    </span>
+                </section>
+            </HeaderContent>
+            <ChildContent>
+                <SidebarItem Href="" Text="Home" Icon="house-door-fill" />
+                <SidebarItem Href="/1" Text="Emitir eCND" Icon="file-earmark-text-fill" />
+                <SidebarItem Href="/1" Text="Validação/Reemissão da CND" Icon="file-earmark-check-fill" />
+                <SidebarItem Href="/1" Text="Relatório de Pendências Fiscais" Icon="file-earmark-bar-graph-fill" />
+                <SidebarItem Href="/1" Text="Minhas Solicitações" Icon="inbox-fill" />
+                <SidebarItem Href="/1" Text="Perguntas Frequentes" Icon="question-circle-fill" />
+            </ChildContent>
+            <FooterContent>
+                <SidebarItem Href="/1" ClassExtra="py-2 px-3 rounded" Text="Sair" Icon="door-closed-fill" />
+            </FooterContent>
+        </Sidebar>
+    </SidebarContent>
+    <ChildContent>@Body</ChildContent>
+</AppShell>

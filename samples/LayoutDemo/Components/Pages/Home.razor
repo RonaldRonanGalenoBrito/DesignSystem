@@ -1,0 +1,72 @@
+@page "/"
+
+<Alert Variant="AlertVariant.Info">
+    <div class="text-center">
+        <strong>Atenção</strong><br />
+        Sistema disponível em dias úteis das 06:00 ás 21:00 horas.<br />
+        Horário de Brasília
+    </div>
+</Alert>
+
+<div class="card">
+  <div class="card-body">
+    <h4>Bem-vindo(a)</h4>
+    Neste site você pode:
+    <ul class="mb-1">
+        <li>Emitir sua certidão negativa de débitos (CND);</li>
+        <li>Validar certidões emitidas;</li>
+        <li>Acessar as perguntas frequentes.</li>
+    </ul>
+    Toque no menu para selecionar a opção desejada.
+  </div>
+</div>
+
+<div class="card mt-3">
+    <div class="card-body">
+        <h2 class="h5">Demonstração de modal</h2>
+        <p class="mb-3">Abra uma janela modal controlada por estado Blazor.</p>
+        <Button OnClick="@AbrirModal">Abrir modal</Button>
+    </div>
+</div>
+
+@if (acaoConfirmada)
+{
+    <Alert Variant="AlertVariant.Success" ClassExtra="mt-3">
+        A ação de demonstração foi confirmada.
+    </Alert>
+}
+
+<Modal Title="Confirmar ação" @bind-IsOpen="modalAberto" Centered>
+    <ChildContent>
+        Deseja confirmar esta ação de demonstração?
+    </ChildContent>
+    <FooterContent>
+        <Button Variant="ButtonVariant.OutlineSecondary" OnClick="@FecharModal">Cancelar</Button>
+        <Button Variant="ButtonVariant.Primary" OnClick="@ConfirmarAcao">Confirmar</Button>
+    </FooterContent>
+</Modal>
+
+<Alert Variant="AlertVariant.Warning" ClassExtra="mt-3">
+    <div class="ms-3">
+        <div class="text-center mb-3"><strong>Aviso Importante</strong></div>
+        <p>Este sistema de emissão de <strong>Certidão Negativa</strong> está em <strong>fase de testes e validação</strong> (produção assistida). Isso significa que o sistema já está funcionando, mas ainda pode passar por ajustes. Neste momento, o acesso está restrito.</p>
+        <p>Sua colaboração é essencial para garantir que tudo funcione corretamente. Caso encontre qualquer erro, dificuldade ou tenha sugestões de melhoria, envie seu feedback pelo seguinte canal:</p>
+        <p><b>E-mail:</b> sideb_scrum@fazenda.sp.gov.br</p>
+         Agradecemos pela sua participação!
+    </div>
+</Alert>
+
+@code {
+    private bool modalAberto;
+    private bool acaoConfirmada;
+
+    private void AbrirModal(MouseEventArgs _) => modalAberto = true;
+
+    private void FecharModal(MouseEventArgs _) => modalAberto = false;
+
+    private void ConfirmarAcao(MouseEventArgs _)
+    {
+        acaoConfirmada = true;
+        modalAberto = false;
+    }
+}
