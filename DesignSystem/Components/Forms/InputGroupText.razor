@@ -1,0 +1,21 @@
+@attribute [ComponentDoc(
+    Slug = "input-group-text",
+    Name = "InputGroupText",
+    Group = "Formulários",
+    Description = "Texto, ícone ou controle auxiliar para usar dentro de InputGroup.",
+    Code = "<InputGroupText><Icon Name=\"search\" /></InputGroupText>",
+    Guidance = "Use dentro de InputGroup ou em PrefixContent/SuffixContent de FormInputText."
+)]
+
+<span @attributes="AdditionalAttributes" class="@ComponentAttributes.Classes(AdditionalAttributes, "input-group-text", ClassExtra)">
+    @ChildContent
+</span>
+
+@code {
+    [ParameterDoc("Texto, ícone ou conteúdo auxiliar.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Classes CSS adicionais aplicadas ao texto do grupo.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+}

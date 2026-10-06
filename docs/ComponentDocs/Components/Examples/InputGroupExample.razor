@@ -1,0 +1,30 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(InputGroup))]
+
+<div class="options-panel">
+    <label>
+        Tamanho
+        <select class="form-select form-select-sm mt-1" @bind="size">
+            @foreach (var value in Enum.GetValues<ButtonSize>())
+            {
+                <option value="@value">@value</option>
+            }
+        </select>
+    </label>
+</div>
+
+<CodeExample Code="@Code">
+    <InputGroup Size="@size">
+        <InputGroupText>R$</InputGroupText>
+        <input class="form-control" @bind="value" inputmode="decimal" aria-label="Valor" />
+        <Button Variant="ButtonVariant.OutlinePrimary">Calcular</Button>
+    </InputGroup>
+    <p class="small text-body-secondary mb-0">Valor informado: @value</p>
+</CodeExample>
+
+@code {
+    private ButtonSize size = ButtonSize.Medium;
+    private string value = "0,00";
+
+    private string Code => $"<InputGroup Size=\"ButtonSize.{size}\">\n    <InputGroupText>R$</InputGroupText>\n    <input class=\"form-control\" />\n    <Button Variant=\"ButtonVariant.OutlinePrimary\">Calcular</Button>\n</InputGroup>";
+}

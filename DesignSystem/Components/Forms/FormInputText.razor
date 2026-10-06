@@ -4,13 +4,26 @@
     Name = "FormInputText",
     Group = "Formulários",
     Description = "Campo de texto com rótulo, ajuda, validação e suporte a binding.",
-    Code = "<FormInputText Label=\"Nome\" @bind-Value=\"name\" HelpText=\"Como podemos chamar você?\" />\n\n@code {\n    private string name = \"\";\n}",
-    Guidance = "O valor continua sendo string ao alterar Type. O binding atualiza no evento change. Use FormInputNumber e FormInputDate para valores tipados."
+    Code = "<FormInputText Label=\"Pesquisar\" @bind-Value=\"term\">\n    <PrefixContent><InputGroupText><Icon Name=\"search\" /></InputGroupText></PrefixContent>\n    <SuffixContent><Button Variant=\"ButtonVariant.OutlinePrimary\">Buscar</Button></SuffixContent>\n</FormInputText>\n\n@code {\n    private string term = \"\";\n}",
+    Guidance = "O valor continua sendo string ao alterar Type. PrefixContent e SuffixContent criam um input-group, preservando label e validação. O binding atualiza no evento change. Use FormInputNumber e FormInputDate para valores tipados."
 )]
 <FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra">
-    <InputText @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
-        Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
-        disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" type="@Type" placeholder="@Placeholder" readonly="@Readonly" />
+    @if (PrefixContent is not null || SuffixContent is not null)
+    {
+        <InputGroup>
+            @PrefixContent
+            <InputText @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
+                Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" type="@Type" placeholder="@Placeholder" readonly="@Readonly" />
+            @SuffixContent
+        </InputGroup>
+    }
+    else
+    {
+        <InputText @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
+            Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+            disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" type="@Type" placeholder="@Placeholder" readonly="@Readonly" />
+    }
 </FieldLayout>
 
 @code {
@@ -20,6 +33,10 @@
     [Parameter] public string? Placeholder { get; set; }
     [ParameterDoc("Impede alteração do valor pelo usuário.")]
     [Parameter] public bool Readonly { get; set; }
+    [ParameterDoc("Conteúdo exibido antes do campo dentro de um input-group.")]
+    [Parameter] public RenderFragment? PrefixContent { get; set; }
+    [ParameterDoc("Conteúdo exibido depois do campo dentro de um input-group.")]
+    [Parameter] public RenderFragment? SuffixContent { get; set; }
 }
 
 

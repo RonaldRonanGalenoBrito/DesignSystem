@@ -2,7 +2,10 @@
 @attribute [ComponentExample(typeof(FormInputText))]
 
 <CodeExample Code="@Code">
-<FormInputText Label="Nome" @bind-Value="name" HelpText="Como podemos chamar você?" />
+<FormInputText Label="Pesquisar" @bind-Value="name" HelpText="Informe um termo para pesquisar.">
+    <PrefixContent><InputGroupText><Icon Name="search" /></InputGroupText></PrefixContent>
+    <SuffixContent><Button Variant="ButtonVariant.OutlinePrimary">Buscar</Button></SuffixContent>
+</FormInputText>
 <p class="small text-body-secondary mb-0">Valor: @name</p>
 </CodeExample>
 
@@ -10,4 +13,3 @@
     private string name = "";
     private string Code => Entry.Code;
 }
-

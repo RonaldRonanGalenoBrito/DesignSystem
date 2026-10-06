@@ -1,0 +1,29 @@
+@attribute [ComponentDoc(
+    Slug = "input-group",
+    Name = "InputGroup",
+    Group = "Formulários",
+    Description = "Agrupa controles, textos e botões em uma única linha de formulário.",
+    Code = "<InputGroup>\n    <InputGroupText>R$</InputGroupText>\n    <input class=\"form-control\" placeholder=\"0,00\" />\n    <Button Variant=\"ButtonVariant.OutlinePrimary\">Calcular</Button>\n</InputGroup>",
+    Guidance = "Use InputGroupText para rótulos, moedas ou ícones. FormInputText aceita PrefixContent e SuffixContent para manter label e validação do campo."
+)]
+
+<div @attributes="AdditionalAttributes" class="@Classes">
+    @ChildContent
+</div>
+
+@code {
+    [ParameterDoc("Conteúdo do grupo, como InputGroupText, controles e Button.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Tamanho dos controles no grupo.")]
+    [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
+    [ParameterDoc("Classes CSS adicionais aplicadas ao grupo.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string Classes => ComponentAttributes.Classes(AdditionalAttributes,
+        "input-group",
+        Size == ButtonSize.Small ? "input-group-sm" : null,
+        Size == ButtonSize.Large ? "input-group-lg" : null,
+        ClassExtra);
+}

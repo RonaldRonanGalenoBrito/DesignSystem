@@ -1,0 +1,13 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(InputGroupText))]
+
+<CodeExample Code="@Code">
+    <InputGroup>
+        <InputGroupText><Icon Name="search" /></InputGroupText>
+        <input class="form-control" placeholder="Pesquisar" aria-label="Pesquisar" />
+    </InputGroup>
+</CodeExample>
+
+@code {
+    private string Code => "<InputGroup>\n    <InputGroupText><Icon Name=\"search\" /></InputGroupText>\n    <input class=\"form-control\" placeholder=\"Pesquisar\" />\n</InputGroup>";
+}
