@@ -6,7 +6,7 @@
     <label class="form-check"><input type="checkbox" class="form-check-input" @bind="disabled" /> Desabilitada</label>
 </div>
 <CodeExample Code="@Code">
-    <Pagination PageCount="20" @bind-CurrentPage="currentPage" Size="@size" Disabled="@disabled" />
+    <Pagination PageCount="30" TotalItems="300" PageSize="10" @bind-CurrentPage="currentPage" Size="@size" Disabled="@disabled" />
     <p class="small text-body-secondary mt-3 mb-0" role="status">Página atual: @currentPage</p>
 </CodeExample>
 
@@ -14,5 +14,5 @@
     private int currentPage = 1;
     private PaginationSize size = PaginationSize.Medium;
     private bool disabled;
-    private string Code => $"<Pagination PageCount=\"20\" @bind-CurrentPage=\"currentPage\"\n            Size=\"PaginationSize.{size}\" Disabled=\"{Bool(disabled)}\" />\n\n@code {{\n    private int currentPage = {currentPage};\n}}";
+    private string Code => $"<Pagination PageCount=\"30\" TotalItems=\"300\" PageSize=\"10\"\n            @bind-CurrentPage=\"currentPage\" Size=\"PaginationSize.{size}\"\n            Disabled=\"{Bool(disabled)}\" />\n\n@code {{\n    private int currentPage = {currentPage};\n}}";
 }

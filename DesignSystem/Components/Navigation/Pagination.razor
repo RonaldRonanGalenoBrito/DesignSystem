@@ -1,13 +1,27 @@
 @attribute [ComponentDoc(
     Slug = "pagination", Name = "Pagination", Group = "Dados",
-    Description = "Navegação entre páginas com janela de números, reticências e binding.",
-    Code = "<Pagination PageCount=\"12\" @bind-CurrentPage=\"page\" />\n\n@code {\n    private int page = 1;\n}",
-    Guidance = "CurrentPage começa em 1. PageCount deve ser zero ou positivo. Use @bind-CurrentPage ou CurrentPageChanged para carregar ou recortar os dados; a paginação não consulta nem modifica a tabela. Ao reduzir o total, a página visual é limitada ao intervalo válido; ajuste também a página e os dados na aplicação. Não depende do JavaScript do Bootstrap."
+    Description = "Navegação entre páginas com janela de números, reticências, resumo de registros e binding.",
+    Code = "<Pagination PageCount=\"30\" TotalItems=\"300\" PageSize=\"10\" @bind-CurrentPage=\"page\" />\n\n@code {\n    private int page = 1;\n}",
+    Guidance = "CurrentPage começa em 1. PageCount deve ser zero ou positivo. Informe TotalItems e PageSize para exibir “Mostrando 1 - 10 de 300”. Use @bind-CurrentPage ou CurrentPageChanged para carregar ou recortar os dados; a paginação não consulta nem modifica a tabela. Não depende do JavaScript do Bootstrap."
 )]
 
 @if (PageCount > 0 && (!HideIfSinglePage || PageCount > 1))
 {
-    <nav @attributes="AdditionalAttributes" aria-label="@Label" class="@ComponentAttributes.Classes(AdditionalAttributes, ClassExtra)">
+    @if (HasSummary)
+    {
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <p class="mb-0 @SummaryClass">@Summary</p>
+            @PaginationNavigation
+        </div>
+    }
+    else
+    {
+        @PaginationNavigation
+    }
+}
+
+@code {
+    private RenderFragment PaginationNavigation => @<nav @attributes="AdditionalAttributes" aria-label="@Label" class="@ComponentAttributes.Classes(AdditionalAttributes, ClassExtra)">
         <ul class="pagination flex-wrap mb-0 @SizeClass">
             <li class="page-item @(Disabled || EffectivePage == 1 ? "disabled" : null)">
                 <button type="button" class="page-link" disabled="@(Disabled || EffectivePage == 1)" aria-label="@PreviousLabel" @onclick="() => Select(EffectivePage - 1)">@PreviousLabel</button>
@@ -30,18 +44,20 @@
                 <button type="button" class="page-link" disabled="@(Disabled || EffectivePage == PageCount)" aria-label="@NextLabel" @onclick="Next">@NextLabel</button>
             </li>
         </ul>
-    </nav>
-}
+    </nav>;
 
-@code {
     [Parameter, ParameterDoc("Quantidade total de páginas. Zero oculta a navegação.")]
     public int PageCount { get; set; }
+    [Parameter, ParameterDoc("Quantidade total de registros. Quando informada, exibe o resumo de itens.")]
+    public int? TotalItems { get; set; }
+    [Parameter, ParameterDoc("Quantidade de registros por página, usada no resumo de itens.")]
+    public int PageSize { get; set; } = 10;
     [Parameter, ParameterDoc("Página atual, começando em 1. Aceita @bind-CurrentPage.")]
     public int CurrentPage { get; set; } = 1;
     [Parameter, ParameterDoc("Notifica a página escolhida.")]
     public EventCallback<int> CurrentPageChanged { get; set; }
     [Parameter, ParameterDoc("Tamanho da janela de páginas, além dos extremos; maior que zero.")]
-    public int VisiblePages { get; set; } = 5;
+    public int VisiblePages { get; set; } = 3;
     [Parameter, ParameterDoc("Tamanho visual dos botões.")]
     public PaginationSize Size { get; set; } = PaginationSize.Medium;
     [Parameter, ParameterDoc("Desabilita todos os botões, por exemplo durante uma consulta.")]
@@ -56,11 +72,23 @@
     public string NextLabel { get; set; } = "Próxima";
     [Parameter, ParameterDoc("Prefixo acessível para os botões numerados.")]
     public string PageLabel { get; set; } = "Página";
+    [Parameter, ParameterDoc("Formato do resumo; {0}, {1} e {2} representam primeiro item, último item e total.")]
+    public string SummaryFormat { get; set; } = "Mostrando {0} - {1} de {2}";
+    [Parameter, ParameterDoc("Classes CSS adicionais aplicadas ao resumo de itens.")]
+    public string? SummaryClass { get; set; }
     [Parameter, ParameterDoc("Classes adicionais da região nav.")]
     public string? ClassExtra { get; set; }
     [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML da região nav.")]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
     private int EffectivePage => Math.Clamp(CurrentPage, 1, Math.Max(1, PageCount));
+    private bool HasSummary => TotalItems is not null;
+    private int FirstItem => TotalItems is > 0
+        ? (int)Math.Min((long)(EffectivePage - 1) * PageSize + 1, TotalItems.Value)
+        : 0;
+    private int LastItem => TotalItems is > 0
+        ? (int)Math.Min((long)FirstItem + PageSize - 1, TotalItems.Value)
+        : 0;
+    private string Summary => string.Format(System.Globalization.CultureInfo.CurrentCulture, SummaryFormat, FirstItem, LastItem, TotalItems);
     private int StartPage => (int)Math.Clamp((long)EffectivePage - VisiblePages / 2, 1, Math.Max(1L, (long)PageCount - VisiblePages + 1));
     private int EndPage => (int)Math.Min(PageCount, (long)StartPage + VisiblePages - 1);
     private string? SizeClass => Size switch { PaginationSize.Small => "pagination-sm", PaginationSize.Large => "pagination-lg", _ => null };
@@ -76,5 +104,7 @@
         if (PageCount < 0) throw new ArgumentOutOfRangeException(nameof(PageCount));
         if (CurrentPage < 1) throw new ArgumentOutOfRangeException(nameof(CurrentPage));
         if (VisiblePages < 1) throw new ArgumentOutOfRangeException(nameof(VisiblePages));
+        if (PageSize < 1) throw new ArgumentOutOfRangeException(nameof(PageSize));
+        if (TotalItems < 0) throw new ArgumentOutOfRangeException(nameof(TotalItems));
     }
 }
