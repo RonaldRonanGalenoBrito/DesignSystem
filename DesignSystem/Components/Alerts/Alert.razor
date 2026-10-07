@@ -4,7 +4,7 @@
     Group = "Feedback",
     Description = "Mensagens contextuais de sucesso, informação, aviso e erro.",
     Code = "<Alert Variant=\"AlertVariant.Success\" Dismissible @bind-Visible=\"visible\">Alterações salvas.</Alert>\n\n@code {\n    private bool visible = true;\n}",
-    Guidance = "Use @bind-Visible para fechar e reabrir a mesma instância. DismissLabel personaliza o texto acessível do botão de fechar."
+    Guidance = "Use @bind-Visible para fechar e reabrir a mesma instância. Defina Floating e Position para exibir o alerta sobre o conteúdo. DismissLabel personaliza o texto acessível do botão de fechar."
 )]
 
 @if (isVisible)
@@ -41,6 +41,10 @@
     [Parameter] public EventCallback<bool> VisibleChanged { get; set; }
     [ParameterDoc("Exibe o ícone contextual do alerta.")]
     [Parameter] public bool ShowIcon { get; set; } = true;
+    [ParameterDoc("Exibe o alerta sobre o conteúdo, fixado na tela.")]
+    [Parameter] public bool Floating { get; set; }
+    [ParameterDoc("Posição do alerta quando Floating estiver ativo.")]
+    [Parameter] public AlertPosition Position { get; set; } = AlertPosition.TopRight;
     [ParameterDoc("Substitui o ícone padrão do alerta.")]
     [Parameter] public string? CustomIcon { get; set; }
     [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
@@ -82,10 +86,25 @@
         };
 
         if (Dismissible) classes.Add("alert-dismissible fade show");
+        if (Floating)
+        {
+            classes.Add("alert-floating");
+            classes.Add($"alert-floating-{ToKebabCase(Position)}");
+        }
         if (!string.IsNullOrWhiteSpace(ClassExtra)) classes.Add(ClassExtra);
 
         return ComponentAttributes.Classes(AdditionalAttributes, classes.ToArray());
     }
+
+    private static string ToKebabCase(AlertPosition position) => position switch
+    {
+        AlertPosition.TopRight => "top-right",
+        AlertPosition.TopCenter => "top-center",
+        AlertPosition.TopLeft => "top-left",
+        AlertPosition.BottomRight => "bottom-right",
+        AlertPosition.BottomLeft => "bottom-left",
+        _ => "top-right"
+    };
 
     private string GetDefaultIcon()
     {

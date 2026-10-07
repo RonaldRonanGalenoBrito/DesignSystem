@@ -1,0 +1,53 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Modal))]
+
+<div class="options-panel">
+    <label>
+        Tamanho
+        <select class="form-select form-select-sm mt-1" @bind="size">
+            @foreach (var value in Enum.GetValues<ModalSize>())
+            {
+                <option value="@value">@value</option>
+            }
+        </select>
+    </label>
+    <label class="form-check"><input class="form-check-input" type="checkbox" @bind="centered" /> Centralizado verticalmente</label>
+    <label class="form-check"><input class="form-check-input" type="checkbox" @bind="closeOnBackdropClick" /> Fechar ao clicar fora</label>
+</div>
+
+<CodeExample Code="@Code">
+    <Button OnClick="@Abrir">Abrir modal</Button>
+
+    @if (confirmed)
+    {
+        <Alert Variant="AlertVariant.Success" ClassExtra="mt-3">Ação confirmada.</Alert>
+    }
+
+    <Modal Title="Confirmar ação" @bind-IsOpen="isOpen" Size="@size" Centered="@centered" CloseOnBackdropClick="@closeOnBackdropClick">
+        <ChildContent>Deseja confirmar esta ação?</ChildContent>
+        <FooterContent>
+            <Button Variant="ButtonVariant.OutlineSecondary" OnClick="@Cancelar">Cancelar</Button>
+            <Button Variant="ButtonVariant.Primary" OnClick="@Confirmar">Confirmar</Button>
+        </FooterContent>
+    </Modal>
+</CodeExample>
+
+@code {
+    private bool isOpen;
+    private ModalSize size;
+    private bool centered = true;
+    private bool closeOnBackdropClick = true;
+    private bool confirmed;
+
+    private void Abrir(MouseEventArgs _) => isOpen = true;
+
+    private void Cancelar(MouseEventArgs _) => isOpen = false;
+
+    private void Confirmar(MouseEventArgs _)
+    {
+        confirmed = true;
+        isOpen = false;
+    }
+
+    private string Code => $"<Button OnClick=\"@Abrir\">Abrir modal</Button>\n\n<Modal Title=\"Confirmar ação\" @bind-IsOpen=\"isOpen\"\n       Size=\"ModalSize.{size}\" Centered=\"{Bool(centered)}\"\n       CloseOnBackdropClick=\"{Bool(closeOnBackdropClick)}\">\n    <ChildContent>Deseja confirmar esta ação?</ChildContent>\n    <FooterContent>\n        <Button Variant=\"ButtonVariant.OutlineSecondary\" OnClick=\"@Cancelar\">Cancelar</Button>\n        <Button Variant=\"ButtonVariant.Primary\" OnClick=\"@Confirmar\">Confirmar</Button>\n    </FooterContent>\n</Modal>\n\n@code {{\n    private bool isOpen;\n\n    private void Abrir(MouseEventArgs _) => isOpen = true;\n    private void Cancelar(MouseEventArgs _) => isOpen = false;\n}}";
+}

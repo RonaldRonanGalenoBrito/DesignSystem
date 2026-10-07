@@ -3,16 +3,35 @@
 
 <div class="options-panel">
 <label>Variante<select class="form-select form-select-sm mt-1" @bind="alertVariant">@foreach (var value in Enum.GetValues<AlertVariant>()) { <option value="@value">@value</option> }</select></label>
+<label class="form-check"><input class="form-check-input" type="checkbox" @bind="floating" /> Flutuante</label>
+@if (floating)
+{
+    <label>Posição<select class="form-select form-select-sm mt-1" @bind="position">@foreach (var value in Enum.GetValues<AlertPosition>()) { <option value="@value">@GetPositionName(value)</option> }</select></label>
+}
 <button class="btn btn-sm btn-outline-secondary" type="button" @onclick="() => visible = true">Reabrir alerta</button>
 </div>
 <CodeExample Code="@Code">
-<Alert Variant="@alertVariant" Dismissible @bind-Visible="visible">Alterações salvas.</Alert>
+<Alert Variant="@alertVariant" Dismissible Floating="@floating" Position="@position" @bind-Visible="visible">Alterações salvas.</Alert>
 @if (!visible) { <p class="text-body-secondary small mb-0">Alerta fechado. Use “Reabrir alerta” para exibir novamente.</p> }
 </CodeExample>
 
 @code {
     private AlertVariant alertVariant = AlertVariant.Success;
     private bool visible = true;
-    private string Code => $"<Alert Variant=\"AlertVariant.{alertVariant}\" Dismissible @bind-Visible=\"visible\">Alterações salvas.</Alert>\n\n@code {{\n    private bool visible = true;\n}}";
-}
+    private bool floating;
+    private AlertPosition position = AlertPosition.TopRight;
+    private string FloatingAttributes => floating
+        ? $" Floating Position=\"AlertPosition.{position}\""
+        : string.Empty;
+    private string Code => $"<Alert Variant=\"AlertVariant.{alertVariant}\" Dismissible{FloatingAttributes} @bind-Visible=\"visible\">Alterações salvas.</Alert>\n\n@code {{\n    private bool visible = true;\n}}";
 
+    private static string GetPositionName(AlertPosition value) => value switch
+    {
+        AlertPosition.TopRight => "Superior direita",
+        AlertPosition.TopCenter => "Superior centro",
+        AlertPosition.TopLeft => "Superior esquerda",
+        AlertPosition.BottomRight => "Inferior direita",
+        AlertPosition.BottomLeft => "Inferior esquerda",
+        _ => value.ToString()
+    };
+}

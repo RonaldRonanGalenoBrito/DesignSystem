@@ -1,0 +1,32 @@
+.alert-floating {
+    position: fixed;
+    z-index: 1080;
+    width: min(26rem, calc(100vw - 2rem));
+    margin: 1rem;
+}
+
+.alert-floating-top-right {
+    top: 0;
+    right: 0;
+}
+
+.alert-floating-top-center {
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.alert-floating-top-left {
+    top: 0;
+    left: 0;
+}
+
+.alert-floating-bottom-right {
+    right: 0;
+    bottom: 0;
+}
+
+.alert-floating-bottom-left {
+    bottom: 0;
+    left: 0;
+}
