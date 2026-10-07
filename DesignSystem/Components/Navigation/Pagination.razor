@@ -1,11 +1,12 @@
 @attribute [ComponentDoc(
     Slug = "pagination", Name = "Pagination", Group = "Dados",
     Description = "Navegação entre páginas com janela de números, reticências, resumo de registros e binding.",
-    Code = "<Pagination PageCount=\"30\" TotalItems=\"300\" PageSize=\"10\" @bind-CurrentPage=\"page\" />\n\n@code {\n    private int page = 1;\n}",
-    Guidance = "CurrentPage começa em 1. PageCount deve ser zero ou positivo. Informe TotalItems e PageSize para exibir “Mostrando 1 - 10 de 300”. Use @bind-CurrentPage ou CurrentPageChanged para carregar ou recortar os dados; a paginação não consulta nem modifica a tabela. Não depende do JavaScript do Bootstrap."
+    Code = "<Pagination State=\"@pagination\" />\n\n@code {\n    private readonly PaginationState<string> pagination = new(pageSize: 10);\n}",
+    Guidance = "Use State com PaginationState<T> para concentrar página atual, tamanho, total e carregamento. Sem State, PageCount, TotalItems, PageSize e CurrentPage continuam disponíveis. Ao usar State, assine Changed na tela que renderiza os itens para atualizá-la após uma troca de página."
 )]
+@implements IDisposable
 
-@if (PageCount > 0 && (!HideIfSinglePage || PageCount > 1))
+@if (PageCountValue > 0 && (!HideIfSinglePage || PageCountValue > 1))
 {
     @if (HasSummary)
     {
@@ -23,8 +24,8 @@
 @code {
     private RenderFragment PaginationNavigation => @<nav @attributes="AdditionalAttributes" aria-label="@Label" class="@ComponentAttributes.Classes(AdditionalAttributes, ClassExtra)">
         <ul class="pagination flex-wrap mb-0 @SizeClass">
-            <li class="page-item @(Disabled || EffectivePage == 1 ? "disabled" : null)">
-                <button type="button" class="page-link" disabled="@(Disabled || EffectivePage == 1)" aria-label="@PreviousLabel" @onclick="() => Select(EffectivePage - 1)">@PreviousLabel</button>
+            <li class="page-item @(IsDisabled || EffectivePage == 1 ? "disabled" : null)">
+                <button type="button" class="page-link" disabled="@(IsDisabled || EffectivePage == 1)" aria-label="@PreviousLabel" @onclick="() => Select(EffectivePage - 1)">@PreviousLabel</button>
             </li>
             @if (StartPage > 1)
             {
@@ -35,19 +36,21 @@
             {
                 @PageButton((int)index)
             }
-            @if (EndPage < PageCount)
+            @if (EndPage < PageCountValue)
             {
-                @if (EndPage < PageCount - 1) { <li class="page-item disabled"><span class="page-link" aria-hidden="true">…</span></li> }
-                @PageButton(PageCount)
+                @if (EndPage < PageCountValue - 1) { <li class="page-item disabled"><span class="page-link" aria-hidden="true">…</span></li> }
+                @PageButton(PageCountValue)
             }
-            <li class="page-item @(Disabled || EffectivePage == PageCount ? "disabled" : null)">
-                <button type="button" class="page-link" disabled="@(Disabled || EffectivePage == PageCount)" aria-label="@NextLabel" @onclick="Next">@NextLabel</button>
+            <li class="page-item @(IsDisabled || EffectivePage == PageCountValue ? "disabled" : null)">
+                <button type="button" class="page-link" disabled="@(IsDisabled || EffectivePage == PageCountValue)" aria-label="@NextLabel" @onclick="Next">@NextLabel</button>
             </li>
         </ul>
     </nav>;
 
     [Parameter, ParameterDoc("Quantidade total de páginas. Zero oculta a navegação.")]
     public int PageCount { get; set; }
+    [Parameter, ParameterDoc("Estado de paginação opcional. Tem prioridade sobre PageCount, TotalItems, PageSize, CurrentPage e Disabled.")]
+    public IPaginationState? State { get; set; }
     [Parameter, ParameterDoc("Quantidade total de registros. Quando informada, exibe o resumo de itens.")]
     public int? TotalItems { get; set; }
     [Parameter, ParameterDoc("Quantidade de registros por página, usada no resumo de itens.")]
@@ -80,31 +83,58 @@
     public string? ClassExtra { get; set; }
     [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML da região nav.")]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
-    private int EffectivePage => Math.Clamp(CurrentPage, 1, Math.Max(1, PageCount));
-    private bool HasSummary => TotalItems is not null;
-    private int FirstItem => TotalItems is > 0
-        ? (int)Math.Min((long)(EffectivePage - 1) * PageSize + 1, TotalItems.Value)
+    private IPaginationState? observedState;
+    private int PageCountValue => State?.PageCount ?? PageCount;
+    private int PageSizeValue => State?.PageSize ?? PageSize;
+    private int TotalItemsValue => State?.TotalItems ?? TotalItems ?? 0;
+    private int CurrentPageValue => State?.CurrentPage ?? CurrentPage;
+    private bool IsDisabled => Disabled || State?.IsLoading == true;
+    private int EffectivePage => Math.Clamp(CurrentPageValue, 1, Math.Max(1, PageCountValue));
+    private bool HasSummary => State is not null || TotalItems is not null;
+    private int FirstItem => TotalItemsValue > 0
+        ? (int)Math.Min((long)(EffectivePage - 1) * PageSizeValue + 1, TotalItemsValue)
         : 0;
-    private int LastItem => TotalItems is > 0
-        ? (int)Math.Min((long)FirstItem + PageSize - 1, TotalItems.Value)
+    private int LastItem => TotalItemsValue > 0
+        ? (int)Math.Min((long)FirstItem + PageSizeValue - 1, TotalItemsValue)
         : 0;
-    private string Summary => string.Format(System.Globalization.CultureInfo.CurrentCulture, SummaryFormat, FirstItem, LastItem, TotalItems);
-    private int StartPage => (int)Math.Clamp((long)EffectivePage - VisiblePages / 2, 1, Math.Max(1L, (long)PageCount - VisiblePages + 1));
-    private int EndPage => (int)Math.Min(PageCount, (long)StartPage + VisiblePages - 1);
+    private string Summary => string.Format(System.Globalization.CultureInfo.CurrentCulture, SummaryFormat, FirstItem, LastItem, TotalItemsValue);
+    private int StartPage => (int)Math.Clamp((long)EffectivePage - VisiblePages / 2, 1, Math.Max(1L, (long)PageCountValue - VisiblePages + 1));
+    private int EndPage => (int)Math.Min(PageCountValue, (long)StartPage + VisiblePages - 1);
     private string? SizeClass => Size switch { PaginationSize.Small => "pagination-sm", PaginationSize.Large => "pagination-lg", _ => null };
     private RenderFragment PageButton(int page) => @<li class="page-item @(page == EffectivePage ? "active" : null)">
-        <button type="button" class="page-link" disabled="@Disabled" aria-label="@($"{PageLabel} {page}")"
+        <button type="button" class="page-link" disabled="@IsDisabled" aria-label="@($"{PageLabel} {page}")"
                 aria-current="@(page == EffectivePage ? "page" : null)" @onclick="() => Select(page)">@(page)</button>
     </li>;
-    private Task Select(int page) => Disabled || page < 1 || page > PageCount || page == EffectivePage
-        ? Task.CompletedTask : CurrentPageChanged.InvokeAsync(page);
-    private Task Next() => EffectivePage < PageCount ? Select(EffectivePage + 1) : Task.CompletedTask;
+    private async Task Select(int page)
+    {
+        if (IsDisabled || page < 1 || page > PageCountValue || page == EffectivePage) return;
+
+        if (State is not null)
+            State.CurrentPage = page;
+        await CurrentPageChanged.InvokeAsync(page);
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private Task Next() => EffectivePage < PageCountValue ? Select(EffectivePage + 1) : Task.CompletedTask;
     protected override void OnParametersSet()
     {
+        if (!ReferenceEquals(observedState, State))
+        {
+            if (observedState is not null) observedState.Changed -= HandleStateChanged;
+            observedState = State;
+            if (observedState is not null) observedState.Changed += HandleStateChanged;
+        }
         if (PageCount < 0) throw new ArgumentOutOfRangeException(nameof(PageCount));
         if (CurrentPage < 1) throw new ArgumentOutOfRangeException(nameof(CurrentPage));
         if (VisiblePages < 1) throw new ArgumentOutOfRangeException(nameof(VisiblePages));
         if (PageSize < 1) throw new ArgumentOutOfRangeException(nameof(PageSize));
         if (TotalItems < 0) throw new ArgumentOutOfRangeException(nameof(TotalItems));
+    }
+
+    private void HandleStateChanged() => _ = InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        if (observedState is not null) observedState.Changed -= HandleStateChanged;
     }
 }
