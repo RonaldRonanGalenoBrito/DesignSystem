@@ -1,0 +1,16 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormRadioGroup<>))]
+
+<CodeExample Code="@Code">
+    <FormRadioGroup TValue="string" Label="Forma de entrega" @bind-Value="delivery">
+        <FormRadio TValue="string" Value="@("standard")" Label="Padrão" />
+        <FormRadio TValue="string" Value="@("express")" Label="Expressa" />
+        <FormRadio TValue="string" Value="@("pickup")" Label="Retirada" />
+    </FormRadioGroup>
+    <p class="small text-body-secondary mb-0">Selecionado: @delivery</p>
+</CodeExample>
+
+@code {
+    private string delivery = "standard";
+    private string Code => Entry.Code;
+}

@@ -1,0 +1,41 @@
+@typeparam TValue
+@inherits FormFieldBase<TValue>
+@attribute [ComponentDoc(
+    Slug = "form-radio-group",
+    TypeArguments = new[] { typeof(string) },
+    Name = "FormRadioGroup",
+    Group = "Formulários",
+    Description = "Grupo de opções mutuamente exclusivas com rótulo, ajuda e validação.",
+    Code = "<FormRadioGroup TValue=\"string\" Label=\"Entrega\" @bind-Value=\"delivery\">\n    <FormRadio TValue=\"string\" Value=\"@(\"standard\")\" Label=\"Padrão\" />\n    <FormRadio TValue=\"string\" Value=\"@(\"express\")\" Label=\"Expressa\" />\n</FormRadioGroup>\n\n@code {\n    private string delivery = \"standard\";\n}",
+    Guidance = "Use FormRadioGroup com FormRadio para valores dos tipos string, enum, int ou outros tipos compatíveis. Todas as opções do mesmo grupo precisam ter o mesmo TValue."
+)]
+
+<div class="mb-3 @ClassExtra">
+    @if (!string.IsNullOrWhiteSpace(Label))
+    {
+        <label id="@($"{Id}-label")" class="form-label">@Label</label>
+    }
+
+    <div @attributes="AdditionalAttributes" class="@GroupClass" role="radiogroup" aria-labelledby="@LabelledBy" aria-invalid="@Invalid" aria-describedby="@DescribedBy">
+        <InputRadioGroup TValue="TValue" Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" Name="@Id">
+            @ChildContent
+        </InputRadioGroup>
+    </div>
+
+    @if (!string.IsNullOrWhiteSpace(HelpText))
+    {
+        <div id="@($"{Id}-help")" class="form-text">@HelpText</div>
+    }
+    @if (ValidationError is not null)
+    {
+        <div id="@($"{Id}-error")" class="invalid-feedback d-block">@ValidationError</div>
+    }
+</div>
+
+@code {
+    [ParameterDoc("Opções FormRadio do grupo.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string GroupClass => ComponentAttributes.Classes(AdditionalAttributes, Invalid is null ? null : "is-invalid");
+    private string? LabelledBy => string.IsNullOrWhiteSpace(Label) ? null : $"{Id}-label";
+}
