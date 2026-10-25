@@ -29,6 +29,8 @@ public abstract class FormFieldBase<TValue> : ComponentBase, IDisposable
     [Parameter] public bool Required { get; set; }
     [ParameterDoc("Classes do contêiner do campo. Use class para estilizar o controle.")]
     [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Aplica a margem inferior Bootstrap (mb-3) ao contêiner do campo.", Default = "true")]
+    [Parameter] public bool UseMarginBottom { get; set; } = true;
     [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 

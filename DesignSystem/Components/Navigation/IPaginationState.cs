@@ -1,4 +1,4 @@
-namespace DesignSystem.Components.Navigation;
+﻿namespace DesignSystem.Components.Navigation;
 
 /// <summary>Provides the values required by a pagination control.</summary>
 public interface IPaginationState

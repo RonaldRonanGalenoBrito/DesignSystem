@@ -10,7 +10,7 @@
     Guidance = "TValue aceita os tipos do InputNumber do Blazor, como int, long, float, double e decimal, inclusive anuláveis. min, max e step são atributos HTML; valide regras de negócio também no modelo."
 )]
 
-<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra">
+<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra" UseMarginBottom="@UseMarginBottom">
     <InputNumber TValue="TValue" @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
         Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
         disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" readonly="@Readonly" ParsingErrorMessage="@ParsingErrorMessage" />

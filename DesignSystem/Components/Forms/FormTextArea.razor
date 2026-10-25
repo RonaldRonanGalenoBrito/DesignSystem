@@ -7,10 +7,20 @@
     Code = "<FormTextArea Label=\"Observações\" @bind-Value=\"notes\" Rows=\"4\" />\n\n@code {\n    private string notes = \"\";\n}",
     Guidance = "Rows deve ser maior que zero. Readonly impede edição, mantendo a seleção do texto. ClassExtra estiliza o contêiner; class estiliza o controle."
 )]
-<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra">
-    <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
-        Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
-        disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly" />
+<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra" UseMarginBottom="@UseMarginBottom">
+    @if (UpdateOnInput)
+    {
+        <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
+            Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+            disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly"
+            @oninput="AtualizarAoDigitar" />
+    }
+    else
+    {
+        <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
+            Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+            disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly" />
+    }
 </FieldLayout>
 
 @code {
@@ -20,6 +30,12 @@
     [Parameter] public string? Placeholder { get; set; }
     [ParameterDoc("Impede alteração do valor pelo usuário.")]
     [Parameter] public bool Readonly { get; set; }
+    [ParameterDoc("Atualiza o valor a cada tecla digitada, em vez de aguardar a perda de foco.")]
+    [Parameter] public bool UpdateOnInput { get; set; }
+
+    private Task AtualizarAoDigitar(ChangeEventArgs evento) =>
+        ChangeValue(evento.Value?.ToString() ?? string.Empty);
+
     protected override void OnParametersSet()
     {
         base.OnParametersSet();

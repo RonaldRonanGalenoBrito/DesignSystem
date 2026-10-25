@@ -1,4 +1,4 @@
-<div class="mb-3 @ClassExtra">
+<div class="@ContainerCssClass">
     @if (!string.IsNullOrWhiteSpace(Label))
     {
         <label for="@Id" class="form-label">@Label @if (Required) { <span class="text-danger" aria-hidden="true">*</span> }</label>
@@ -27,8 +27,14 @@
     [Parameter] public string? ErrorMessage { get; set; }
     [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
     [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Aplica a classe Bootstrap mb-3 ao contêiner do campo.", Default = "true")]
+    [Parameter] public bool UseMarginBottom { get; set; } = true;
     [ParameterDoc("Conteúdo Razor interno.")]
     [Parameter] public RenderFragment? ChildContent { get; set; }
+
+    private string ContainerCssClass => UseMarginBottom
+        ? $"mb-3 {ClassExtra}"
+        : ClassExtra ?? string.Empty;
 }
 
 

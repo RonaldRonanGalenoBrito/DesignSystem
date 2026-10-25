@@ -10,7 +10,7 @@
     Guidance = "O controle usa InputDate do Blazor no modo de data. DateOnly e DateTime, inclusive anuláveis, atendem ao uso comum. A aparência do calendário depende do navegador."
 )]
 
-<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra">
+<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra" UseMarginBottom="@UseMarginBottom">
     <InputDate TValue="TValue" @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
         Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
         disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" readonly="@Readonly" ParsingErrorMessage="@ParsingErrorMessage" />

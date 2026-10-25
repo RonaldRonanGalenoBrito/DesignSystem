@@ -1,4 +1,4 @@
-﻿namespace DesignSystem.Components.Navigation;
+namespace DesignSystem.Components.Navigation;
 /// <summary>/// Mantém o estado de paginação de uma coleção já carregada em memória./// A consulta, ordenação e filtragem dos dados permanecem sob responsabilidade da tela consumidora./// </summary>
 
 public sealed class PaginationState<T> : IPaginationState
