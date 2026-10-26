@@ -1,0 +1,76 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormDatepicker<>))]
+
+<h6>Data única</h6>
+<div class="options-panel">
+    <label>Tema do calendário
+        <select class="form-control form-control-sm mt-1" @bind="datepickerTheme">
+            <option value="@DatepickerTheme.Inherit">Padrão</option>
+            <option value="@DatepickerTheme.Light">Light</option>
+            <option value="@DatepickerTheme.Dark">Dark</option>
+            <option value="@DatepickerTheme.Auto">Auto</option>
+        </select>
+    </label>
+    <label>Tamanho do campo
+        <select class="form-control form-control-sm mt-1" @bind="size">
+            @foreach (var value in Enum.GetValues<FormControlSize>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+</div>
+<CodeExample Code="@SingleCode">
+    <FormDatepicker TValue="DateOnly?" Label="Data localizada" Locale="pt-BR" EndIcon="calendar3"
+                    DatepickerTheme="@datepickerTheme" Size="@size" @bind-Value="singleDate" />
+</CodeExample>
+
+<h6>Múltiplas datas</h6>
+<CodeExample Code="@MultipleCode">
+    <FormDatepicker TValue="DateOnly[]" Label="Selecione várias datas" SelectionMode="DatepickerSelectionMode.Multiple" Locale="pt-BR"
+                    DatepickerTheme="@datepickerTheme" @bind-Value="multipleDates" />
+    <p class="small fg-2 mb-0">Selecionadas: @string.Join(", ", multipleDates.Select(date => date.ToString("dd/MM/yyyy")))</p>
+</CodeExample>
+
+<h6>Intervalo com acionador de botão</h6>
+<CodeExample Code="@RangeCode">
+    <FormDatepicker TValue="DateOnly[]" Label="Período da consulta" SelectionMode="DatepickerSelectionMode.MultipleRanged"
+                    Trigger="DatepickerTrigger.Button" TriggerText="Escolher período" DisplayMonthsCount="2"
+                    DatepickerTheme="@datepickerTheme" @bind-Value="dateRange" />
+    <p class="small fg-2 mb-0">Período: @string.Join(" – ", dateRange.Select(date => date.ToString("dd/MM/yyyy")))</p>
+</CodeExample>
+
+<h6>Posicionamento</h6>
+<CodeExample Code="@PlacementCode">
+    <div class="d-flex flex-wrap gap-3">
+        <FormDatepicker TValue="DateOnly?" Label="Esquerda" Placement="DatepickerPlacement.Left" DatepickerTheme="@datepickerTheme" @bind-Value="leftDate" />
+        <FormDatepicker TValue="DateOnly?" Label="Centro" Placement="DatepickerPlacement.Center" DatepickerTheme="@datepickerTheme" @bind-Value="centerDate" />
+        <FormDatepicker TValue="DateOnly?" Label="Direita" Placement="DatepickerPlacement.Right" DatepickerTheme="@datepickerTheme" @bind-Value="rightDate" />
+        <FormDatepicker TValue="DateOnly?" Label="Automático" Placement="DatepickerPlacement.Auto" DatepickerTheme="@datepickerTheme" @bind-Value="autoDate" />
+    </div>
+</CodeExample>
+
+<h6>Calendário inline</h6>
+<CodeExample Code="@InlineCode">
+    <FormDatepicker TValue="DateOnly?" Label="Calendário sempre visível" Trigger="DatepickerTrigger.Inline"
+                    DatepickerTheme="@datepickerTheme" @bind-Value="inlineDate" />
+    <p class="small fg-2 mb-0">Selecionada: @(inlineDate?.ToString("dd/MM/yyyy") ?? "nenhuma")</p>
+</CodeExample>
+
+@code {
+    private DateOnly? singleDate;
+    private DatepickerTheme datepickerTheme = DatepickerTheme.Inherit;
+    private FormControlSize size = FormControlSize.Medium;
+    private DateOnly[] multipleDates = [];
+    private DateOnly[] dateRange = [];
+    private DateOnly? leftDate;
+    private DateOnly? centerDate;
+    private DateOnly? rightDate;
+    private DateOnly? autoDate;
+    private DateOnly? inlineDate;
+    private string SingleCode => $"<FormDatepicker TValue=\"DateOnly?\" Label=\"Data localizada\" Locale=\"pt-BR\" EndIcon=\"calendar3\"{DatepickerThemeAttribute}{SizeAttribute} @bind-Value=\"singleDate\" />\n\n@code {{ private DateOnly? singleDate; }}";
+    private string DatepickerThemeAttribute => datepickerTheme == DatepickerTheme.Inherit ? string.Empty : $" DatepickerTheme=\"DatepickerTheme.{datepickerTheme}\"";
+    private string SizeAttribute => size == FormControlSize.Medium ? string.Empty : $" Size=\"FormControlSize.{size}\"";
+    private string MultipleCode => $"<FormDatepicker TValue=\"DateOnly[]\" Label=\"Selecione várias datas\" SelectionMode=\"DatepickerSelectionMode.Multiple\"{DatepickerThemeAttribute} @bind-Value=\"multipleDates\" />\n\n@code {{ private DateOnly[] multipleDates = []; }}";
+    private string RangeCode => $"<FormDatepicker TValue=\"DateOnly[]\" Label=\"Período da consulta\" SelectionMode=\"DatepickerSelectionMode.MultipleRanged\" Trigger=\"DatepickerTrigger.Button\" DisplayMonthsCount=\"2\"{DatepickerThemeAttribute} @bind-Value=\"dateRange\" />\n\n@code {{ private DateOnly[] dateRange = []; }}";
+    private string PlacementCode => $"<FormDatepicker TValue=\"DateOnly?\" Label=\"Esquerda\" Placement=\"DatepickerPlacement.Left\"{DatepickerThemeAttribute} @bind-Value=\"leftDate\" />\n<FormDatepicker TValue=\"DateOnly?\" Label=\"Centro\" Placement=\"DatepickerPlacement.Center\"{DatepickerThemeAttribute} @bind-Value=\"centerDate\" />\n<FormDatepicker TValue=\"DateOnly?\" Label=\"Direita\" Placement=\"DatepickerPlacement.Right\"{DatepickerThemeAttribute} @bind-Value=\"rightDate\" />\n<FormDatepicker TValue=\"DateOnly?\" Label=\"Automático\" Placement=\"DatepickerPlacement.Auto\"{DatepickerThemeAttribute} @bind-Value=\"autoDate\" />";
+    private string InlineCode => $"<FormDatepicker TValue=\"DateOnly?\" Label=\"Calendário sempre visível\" Trigger=\"DatepickerTrigger.Inline\"{DatepickerThemeAttribute} @bind-Value=\"inlineDate\" />\n\n@code {{ private DateOnly? inlineDate; }}";
+}
+

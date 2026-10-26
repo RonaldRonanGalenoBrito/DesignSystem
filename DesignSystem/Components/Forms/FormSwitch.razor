@@ -1,0 +1,44 @@
+@inherits FormFieldBase<bool>
+@attribute [ComponentDoc(
+    Slug = "form-switch",
+    Name = "FormSwitch",
+    Group = "Formulários",
+    Description = "Campo booleano apresentado como interruptor.",
+    Code = "<FormSwitch Label=\"Receber notificações\" @bind-Value=\"enabled\" />\n\n@code {\n    private bool enabled;\n}",
+    Guidance = "Use FormSwitch para um interruptor e FormCheckbox para uma caixa quadrada. Para exigir valor true no modelo, use uma regra específica: Required sozinho não rejeita false. Theme define a cor ativa; Size usa FormControlSize: Small, Medium ou Large."
+)]
+
+<div data-bs-theme="@DataBsTheme" class="@(UseMarginBottom ? "mb-4" : null) @ThemeClass @ClassExtra">
+    <div class="d-flex align-items-center gap-2">
+        <span class="@SwitchClass">
+            <InputCheckbox @attributes="AdditionalAttributes" id="@Id" class="@ControlClass(string.Empty)"
+                           Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                           disabled="@Disabled" required="@Required" role="switch"
+                           aria-invalid="@Invalid" aria-describedby="@DescribedBy" />
+        </span>
+        @if (!string.IsNullOrWhiteSpace(Label))
+        {
+            <label class="form-label mb-0" for="@Id">@Label</label>
+        }
+    </div>
+    @if (!string.IsNullOrWhiteSpace(HelpText))
+    {
+        <div id="@($"{Id}-help")" class="form-text">@HelpText</div>
+    }
+    @if (ValidationError is not null)
+    {
+        <div id="@($"{Id}-error")" class="invalid-feedback d-block">@ValidationError</div>
+    }
+</div>
+
+@code {
+    [ParameterDoc("Tamanho Bootstrap do controle: Small, Medium ou Large.")]
+    [Parameter] public FormControlSize Size { get; set; } = FormControlSize.Medium;
+
+    private string SwitchClass => Size switch
+    {
+        FormControlSize.Small => "switch switch-sm",
+        FormControlSize.Large => "switch switch-lg",
+        _ => "switch"
+    };
+}

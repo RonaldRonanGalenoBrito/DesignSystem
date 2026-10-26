@@ -1,15 +1,16 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "spinner",
     Name = "Spinner",
     Group = "Feedback",
     Description = "Indicadores de carregamento com rótulo visível e duas animações.",
-    Code = "<Spinner Variant=\"ColorVariant.Primary\" Label=\"Carregando pedidos...\" />",
+    Code = "<Spinner Theme=\"ThemeColor.Primary\" Label=\"Carregando pedidos...\" />",
     Guidance = "Use Label para explicar o que está sendo carregado; ele aparece ao lado do indicador. ShowLabel=false mantém o texto apenas para leitores de tela. Small reduz o tamanho; Grow troca o círculo pela animação de expansão."
 )]
 
 <span @attributes="AdditionalAttributes" role="status"
-      class="@ComponentAttributes.Classes(AdditionalAttributes, "d-inline-flex align-items-center gap-2", $"text-{Variant.ToString().ToLowerInvariant()}", ClassExtra)">
-    <span class="@ComponentAttributes.Classes(null, SpinnerClass, Small ? $"{SpinnerClass}-sm" : null)" aria-hidden="true"></span>
+      class="@ThemedClasses(AdditionalAttributes, "d-inline-flex align-items-center gap-2", $"fg-{ResolveTheme(ThemeColor.Primary)}", ClassExtra)">
+    <span class="@ThemedClasses(null, SpinnerClass, Small ? $"{SpinnerClass}-sm" : null)" aria-hidden="true"></span>
     @if (ShowLabel)
     {
         <span>@Label</span>
@@ -21,8 +22,6 @@
 </span>
 
 @code {
-    [ParameterDoc("Variante de cor ou apresentação.")]
-    [Parameter] public ColorVariant Variant { get; set; } = ColorVariant.Primary;
     [ParameterDoc("Usa o spinner pequeno.")]
     [Parameter] public bool Small { get; set; }
     [ParameterDoc("Usa a animação spinner-grow.")]

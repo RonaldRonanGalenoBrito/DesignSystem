@@ -1,15 +1,26 @@
 @inherits ExampleBase
 @attribute [ComponentExample(typeof(Card))]
 
+<div class="options-panel">
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="theme">
+            <option value="">Padrão</option>
+            @foreach (var value in Enum.GetValues<ThemeColor>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+    <label class="d-flex align-items-center gap-2"><input class="check" type="checkbox" @bind="subtle" /> Subtle</label>
+</div>
 <CodeExample Code="@Code">
-<Card Title="Resumo do projeto" Subtitle="Atualizado hoje" Shadow>
+<Card Theme="@theme" Subtle="@subtle" Title="Resumo do projeto" Subtitle="Atualizado hoje" Shadow>
     <ChildContent>As informações mais importantes em um só lugar.</ChildContent>
     <FooterContent>Última atualização: agora</FooterContent>
 </Card>
 </CodeExample>
 
 @code {
-    
-    private string Code => Entry.Code;
+    private ThemeColor? theme;
+    private bool subtle;
+    private string ThemeAttribute => theme is { } value ? $" Theme=\"ThemeColor.{value}\"" : string.Empty;
+    private string Code => $"<Card{ThemeAttribute} Subtle=\"{Bool(subtle)}\" Title=\"Resumo do projeto\" Subtitle=\"Atualizado hoje\" Shadow>\n    <ChildContent>As informações mais importantes em um só lugar.</ChildContent>\n    <FooterContent>Última atualização: agora</FooterContent>\n</Card>";
 }
 

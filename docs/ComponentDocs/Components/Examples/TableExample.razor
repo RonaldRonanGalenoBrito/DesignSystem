@@ -1,25 +1,44 @@
 @inherits ExampleBase
 @attribute [ComponentExample(typeof(Table<>))]
+@implements IDisposable
 
 <div class="options-panel">
-    <label class="form-check"><input type="checkbox" class="form-check-input" @bind="striped" /> Listras</label>
-    <label class="form-check"><input type="checkbox" class="form-check-input" @bind="bordered" /> Bordas</label>
-    <label class="form-check"><input type="checkbox" class="form-check-input" @bind="small" /> Compacta</label>
-    <label class="form-check"><input type="checkbox" class="form-check-input" @bind="loading" /> Carregando</label>
-    <label class="form-check"><input type="checkbox" class="form-check-input" @bind="empty" /> Vazia</label>
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="theme">
+            <option value="">Padrão</option>
+            @foreach (var value in Enum.GetValues<ThemeColor>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="striped" /> Listras</label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="bordered" /> Bordas</label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="small" /> Compacta</label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="loading" /> Carregando</label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="empty" @bind:after="UpdateItems" /> Vazia</label>
 </div>
 <CodeExample Code="@Code">
-    <Table TItem="string" Items="@(empty ? Array.Empty<string>() : names.Skip((currentPage - 1) * 3).Take(3))"
-           Caption="Pessoas" ColumnCount="1" Striped="@striped" Bordered="@bordered" Small="@small" Hover IsLoading="@loading">
+    <Table TItem="string" Items="@pagination.CurrentItems"
+           Caption="Pessoas" ColumnCount="1" Theme="@theme" Striped="@striped" Bordered="@bordered" Small="@small" Hover IsLoading="@loading">
         <HeaderContent><tr><th scope="col">Nome</th></tr></HeaderContent>
         <RowTemplate Context="name"><td>@name</td></RowTemplate>
     </Table>
-    <Pagination PageCount="@(empty ? 0 : 3)" @bind-CurrentPage="currentPage" Disabled="@loading" Label="Páginas de pessoas" />
+    <Pagination State="@pagination" Theme="@theme" Disabled="@loading" Label="Páginas de pessoas" />
 </CodeExample>
 
 @code {
     private string[] names = ["Ana", "Bruno", "Carla", "Daniel", "Elisa", "Felipe", "Gabriela"];
-    private int currentPage = 1;
+    private readonly PaginationState<string> pagination = new(pageSize: 3);
     private bool striped = true, bordered, small, loading, empty;
-    private string Code => $"<Table TItem=\"string\" Items=\"@(empty ? Array.Empty<string>() : names.Skip((currentPage - 1) * 3).Take(3))\"\n       Caption=\"Pessoas\" ColumnCount=\"1\" Striped=\"{Bool(striped)}\" Bordered=\"{Bool(bordered)}\"\n       Small=\"{Bool(small)}\" Hover IsLoading=\"@loading\">\n    <HeaderContent><tr><th scope=\"col\">Nome</th></tr></HeaderContent>\n    <RowTemplate Context=\"name\"><td>@name</td></RowTemplate>\n</Table>\n<Pagination PageCount=\"@(empty ? 0 : 3)\" @bind-CurrentPage=\"currentPage\" Disabled=\"@loading\" Label=\"Páginas de pessoas\" />\n\n@code {{\n    private string[] names = [\"Ana\", \"Bruno\", \"Carla\", \"Daniel\", \"Elisa\", \"Felipe\", \"Gabriela\"];\n    private int currentPage = 1;\n    private bool loading = {Bool(loading)}, empty = {Bool(empty)};\n}}";
+    private ThemeColor? theme;
+    private string ThemeAttribute => theme is { } value ? $" Theme=\"ThemeColor.{value}\"" : string.Empty;
+    protected override void OnInitialized()
+    {
+        pagination.Changed += HandlePaginationChanged;
+        UpdateItems();
+    }
+
+    private void UpdateItems() => pagination.SetItems(empty ? [] : names);
+    private void HandlePaginationChanged() => _ = InvokeAsync(StateHasChanged);
+    public void Dispose() => pagination.Changed -= HandlePaginationChanged;
+
+    private string Code => $"@implements IDisposable\n\n<Table TItem=\"string\" Items=\"@pagination.CurrentItems\"\n       Caption=\"Pessoas\" ColumnCount=\"1\"{ThemeAttribute} Striped=\"{Bool(striped)}\" Bordered=\"{Bool(bordered)}\"\n       Small=\"{Bool(small)}\" Hover IsLoading=\"@loading\">\n    <HeaderContent><tr><th scope=\"col\">Nome</th></tr></HeaderContent>\n    <RowTemplate Context=\"name\"><td>@name</td></RowTemplate>\n</Table>\n<Pagination State=\"@pagination\"{ThemeAttribute} Disabled=\"@loading\" Label=\"Páginas de pessoas\" />\n\n@code {{\n    private string[] names = [\"Ana\", \"Bruno\", \"Carla\", \"Daniel\", \"Elisa\", \"Felipe\", \"Gabriela\"];\n    private readonly PaginationState<string> pagination = new(pageSize: 3);\n    private bool loading = {Bool(loading)}, empty = {Bool(empty)};\n\n    protected override void OnInitialized()\n    {{\n        pagination.Changed += HandlePaginationChanged;\n        pagination.SetItems(empty ? [] : names);\n    }}\n\n    private void HandlePaginationChanged() => _ = InvokeAsync(StateHasChanged);\n    public void Dispose() => pagination.Changed -= HandlePaginationChanged;\n}}";
 }

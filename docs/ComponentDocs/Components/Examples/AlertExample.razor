@@ -2,28 +2,45 @@
 @attribute [ComponentExample(typeof(Alert))]
 
 <div class="options-panel">
-<label>Variante<select class="form-select form-select-sm mt-1" @bind="alertVariant">@foreach (var value in Enum.GetValues<AlertVariant>()) { <option value="@value">@value</option> }</select></label>
-<label class="form-check"><input class="form-check-input" type="checkbox" @bind="floating" /> Flutuante</label>
+<label>Tema<select class="form-control form-control-sm mt-1" @bind="theme">
+    <option value="">Padrão</option>
+    @foreach (var value in Enum.GetValues<ThemeColor>()) { <option value="@value">@value</option> }
+</select></label>
+<label class="d-flex align-items-center gap-2"><input class="check" type="checkbox" @bind="floating" @bind:after="ShowAlert" /> Flutuante</label>
 @if (floating)
 {
-    <label>Posição<select class="form-select form-select-sm mt-1" @bind="position">@foreach (var value in Enum.GetValues<AlertPosition>()) { <option value="@value">@GetPositionName(value)</option> }</select></label>
+    <label>Posição<select class="form-control form-control-sm mt-1" @bind="position">@foreach (var value in Enum.GetValues<AlertPosition>()) { <option value="@value">@GetPositionName(value)</option> }</select></label>
 }
-<button class="btn btn-sm btn-outline-secondary" type="button" @onclick="() => visible = true">Reabrir alerta</button>
+<button class="btn btn-sm btn-outline theme-secondary" type="button" @onclick="() => visible = true">Reabrir alerta</button>
 </div>
+@if (floating)
+{
+    @AlertPreview
+}
 <CodeExample Code="@Code">
-<Alert Variant="@alertVariant" Dismissible Floating="@floating" Position="@position" @bind-Visible="visible">Alterações salvas.</Alert>
-@if (!visible) { <p class="text-body-secondary small mb-0">Alerta fechado. Use “Reabrir alerta” para exibir novamente.</p> }
+@if (!floating)
+{
+    @AlertPreview
+}
+else if (visible)
+{
+    <p class="fg-2 small mb-0" role="status">O alerta está flutuando na janela: @GetPositionName(position). Use o seletor de posição para movê-lo.</p>
+}
+@if (!visible) { <p class="fg-2 small mb-0">Alerta fechado. Use “Reabrir alerta” para exibir novamente.</p> }
 </CodeExample>
 
 @code {
-    private AlertVariant alertVariant = AlertVariant.Success;
+    private ThemeColor? theme;
     private bool visible = true;
     private bool floating;
     private AlertPosition position = AlertPosition.TopRight;
+    private void ShowAlert() => visible = true;
+    private RenderFragment AlertPreview => @<Alert Theme="@theme" Dismissible Floating="@floating" Position="@position" @bind-Visible="visible">Alterações salvas.</Alert>;
+    private string ThemeAttribute => theme is { } value ? $" Theme=\"ThemeColor.{value}\"" : string.Empty;
     private string FloatingAttributes => floating
         ? $" Floating Position=\"AlertPosition.{position}\""
         : string.Empty;
-    private string Code => $"<Alert Variant=\"AlertVariant.{alertVariant}\" Dismissible{FloatingAttributes} @bind-Visible=\"visible\">Alterações salvas.</Alert>\n\n@code {{\n    private bool visible = true;\n}}";
+    private string Code => $"<Alert{ThemeAttribute} Dismissible{FloatingAttributes} @bind-Visible=\"visible\">Alterações salvas.</Alert>\n\n@code {{\n    private bool visible = true;\n}}";
 
     private static string GetPositionName(AlertPosition value) => value switch
     {

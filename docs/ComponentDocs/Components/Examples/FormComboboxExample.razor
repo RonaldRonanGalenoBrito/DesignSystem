@@ -1,0 +1,82 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormCombobox<>))]
+
+<div class="options-panel">
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="colorScheme">
+            <option value="Inherit">Padrão</option>
+            <option value="Light">Claro</option>
+            <option value="Dark">Escuro</option>
+        </select>
+    </label>
+    <label>Tamanho
+        <select class="form-control form-control-sm mt-1" @bind="size">
+            @foreach (var value in Enum.GetValues<FormControlSize>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+    <label>Posicionamento
+        <select class="form-control form-control-sm mt-1" @bind="placement">
+            <option value="bottom-start">Abaixo, início</option>
+            <option value="bottom-end">Abaixo, fim</option>
+            <option value="top-start">Acima, início</option>
+            <option value="top-end">Acima, fim</option>
+        </select>
+    </label>
+    <fieldset class="d-flex flex-wrap gap-3 align-items-center border-0 p-0 m-0">
+        <legend class="small mb-0">Recursos</legend>
+        <label class="d-flex align-items-center gap-2"><input type="checkbox" @bind="search" @bind:after="SearchChanged" /> Busca</label>
+        <label class="d-flex align-items-center gap-2"><input type="checkbox" @bind="searchNormalize" disabled="@(!search)" /> Ignorar acentos</label>
+        <label class="d-flex align-items-center gap-2"><input type="checkbox" @bind="multiple" /> Seleção múltipla</label>
+    </fieldset>
+</div>
+
+<CodeExample Code="@Code">
+    @if (multiple)
+    {
+        <FormCombobox TValue="string[]" Label="Área de interesse" Items="@interests"
+                      Search="@search" SearchNormalize="@(search && searchNormalize)" Multiple
+                      Placeholder="Selecione áreas" Placement="@placement" ColorScheme="@colorScheme" Size="@size"
+                      @bind-Value="selectedInterests" />
+        <p class="small fg-2 mb-0">Selecionadas: @(selectedInterests.Length == 0 ? "nenhuma" : string.Join(", ", selectedInterests))</p>
+    }
+    else
+    {
+        <FormCombobox TValue="string" Label="Área de interesse" Items="@interests"
+                      Search="@search" SearchNormalize="@(search && searchNormalize)"
+                      Placeholder="Selecione uma área" Placement="@placement" ColorScheme="@colorScheme" Size="@size"
+                      @bind-Value="selectedInterest" />
+        <p class="small fg-2 mb-0">Selecionada: @(string.IsNullOrEmpty(selectedInterest) ? "nenhuma" : selectedInterest)</p>
+    }
+</CodeExample>
+
+@code {
+    private FormColorScheme colorScheme = FormColorScheme.Inherit;
+    private FormControlSize size = FormControlSize.Medium;
+    private string placement = "bottom-start";
+    private bool search;
+    private bool searchNormalize;
+    private bool multiple;
+    private string selectedInterest = string.Empty;
+    private string[] selectedInterests = [];
+    private readonly FormComboboxOption[] interests =
+    [
+        new("accessibility", "Acessibilidade"),
+        new("design", "Design"),
+        new("engineering", "Engenharia"),
+        new("research", "Pesquisa")
+    ];
+
+    private string BehaviorAttributes => (search ? " Search" : string.Empty)
+        + (search && searchNormalize ? " SearchNormalize" : string.Empty)
+        + (multiple ? " Multiple" : string.Empty)
+        + (placement == "bottom-start" ? string.Empty : $" Placement=\"{placement}\"")
+        + ColorSchemeAttribute(colorScheme)
+        + FormControlSizeAttribute(size);
+    private void SearchChanged()
+    {
+        if (!search) searchNormalize = false;
+    }
+    private string Code => multiple
+        ? $"<FormCombobox TValue=\"string[]\" Label=\"Área de interesse\" Items=\"@interests\"{BehaviorAttributes} Placeholder=\"Selecione áreas\" @bind-Value=\"selectedInterests\" />\n\n@code {{\n    private string[] selectedInterests = [];\n    private readonly FormComboboxOption[] interests = [\n        new(\"accessibility\", \"Acessibilidade\"),\n        new(\"design\", \"Design\"),\n        new(\"engineering\", \"Engenharia\"),\n        new(\"research\", \"Pesquisa\")\n    ];\n}}"
+        : $"<FormCombobox TValue=\"string\" Label=\"Área de interesse\" Items=\"@interests\"{BehaviorAttributes} Placeholder=\"Selecione uma área\" @bind-Value=\"selectedInterest\" />\n\n@code {{\n    private string selectedInterest = string.Empty;\n    private readonly FormComboboxOption[] interests = [\n        new(\"accessibility\", \"Acessibilidade\"),\n        new(\"design\", \"Design\"),\n        new(\"engineering\", \"Engenharia\"),\n        new(\"research\", \"Pesquisa\")\n    ];\n}}";
+}

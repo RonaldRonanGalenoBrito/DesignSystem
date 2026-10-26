@@ -2,21 +2,31 @@
 @attribute [ComponentExample(typeof(Accordion))]
 
 <div class="options-panel">
-    <label class="form-check"><input type="checkbox" class="form-check-input" @bind="multiple" @bind:after="Reset" /> Vários abertos</label>
-    <label class="form-check"><input type="checkbox" class="form-check-input" @bind="flush" /> Sem bordas externas</label>
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="theme">
+            <option value="">Padrão</option>
+            @foreach (var color in Enum.GetValues<ThemeColor>()) { <option value="@color">@color</option> }
+        </select>
+    </label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="multiple" @bind:after="Reset" /> Vários abertos</label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="flush" /> Sem bordas externas</label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="gap" /> Espaço entre painéis</label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="small" /> Compacto</label>
 </div>
 <CodeExample Code="@Code">
-    <Accordion AllowMultiple="@multiple" Flush="@flush" @bind-ExpandedIds="expanded">
+    <Accordion Theme="@theme" Gap="@gap" Small="@small" AllowMultiple="@multiple" Flush="@flush" @bind-ExpandedIds="expanded">
         <AccordionItem Id="example-details" Title="Detalhes">O conteúdo é preservado ao fechar e reabrir.</AccordionItem>
         <AccordionItem Id="example-help" Title="Ajuda">Use Enter ou Espaço no título para alternar o painel.</AccordionItem>
         <AccordionItem Id="example-disabled" Title="Indisponível" Disabled>Este painel está desabilitado.</AccordionItem>
     </Accordion>
-    <p class="small text-body-secondary mt-3 mb-0" role="status">Painéis abertos: @expanded.Count</p>
+    <p class="small fg-2 mt-4 mb-0" role="status">Painéis abertos: @expanded.Count</p>
 </CodeExample>
 
 @code {
-    private bool multiple, flush;
+    private bool multiple, flush, gap, small;
+    private ThemeColor? theme;
     private IReadOnlyCollection<string> expanded = ["example-details"];
     private void Reset() => expanded = Array.Empty<string>();
-    private string Code => $"<Accordion AllowMultiple=\"{Bool(multiple)}\" Flush=\"{Bool(flush)}\" @bind-ExpandedIds=\"expanded\">\n    <AccordionItem Id=\"details\" Title=\"Detalhes\">Conteúdo preservado ao fechar.</AccordionItem>\n    <AccordionItem Id=\"help\" Title=\"Ajuda\">Use Enter ou Espaço para alternar.</AccordionItem>\n    <AccordionItem Id=\"disabled\" Title=\"Indisponível\" Disabled>Desabilitado.</AccordionItem>\n</Accordion>\n\n@code {{\n    private IReadOnlyCollection<string> expanded = [\"details\"];\n}}";
+    private string ThemeAttribute => theme is { } color ? $" Theme=\"ThemeColor.{color}\"" : string.Empty;
+    private string Code => $"<Accordion{ThemeAttribute} Gap=\"{Bool(gap)}\" Small=\"{Bool(small)}\" AllowMultiple=\"{Bool(multiple)}\" Flush=\"{Bool(flush)}\" @bind-ExpandedIds=\"expanded\">\n    <AccordionItem Id=\"details\" Title=\"Detalhes\">Conteúdo preservado ao fechar.</AccordionItem>\n    <AccordionItem Id=\"help\" Title=\"Ajuda\">Use Enter ou Espaço para alternar.</AccordionItem>\n    <AccordionItem Id=\"disabled\" Title=\"Indisponível\" Disabled>Desabilitado.</AccordionItem>\n</Accordion>\n\n@code {{\n    private IReadOnlyCollection<string> expanded = [\"details\"];\n}}";
 }

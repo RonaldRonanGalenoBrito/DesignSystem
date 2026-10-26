@@ -1,0 +1,77 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(Dialog))]
+
+<div class="options-panel">
+    <label>Tamanho
+        <select class="form-control form-control-sm mt-1" @bind="size">
+            @foreach (var value in Enum.GetValues<DialogSize>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+    <label>Animação
+        <select class="form-control form-control-sm mt-1" @bind="animation">
+            @foreach (var value in Enum.GetValues<DialogAnimation>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="theme">
+            <option value="">Padrão</option>
+            @foreach (var value in Enum.GetValues<ThemeColor>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+    <label class="d-flex align-items-center gap-2"><input class="check" type="checkbox" @bind="fullscreen" /> Tela cheia</label>
+    <label class="d-flex align-items-center gap-2"><input class="check" type="checkbox" @bind="scrollable" /> Rolagem no corpo</label>
+    <label class="d-flex align-items-center gap-2"><input class="check" type="checkbox" @bind="centered" /> Centralizado</label>
+    <label class="d-flex align-items-center gap-2"><input class="check" type="checkbox" @bind="closeOnBackdropClick" /> Fechar ao clicar fora</label>
+</div>
+
+<CodeExample Code="@Code">
+    <Button OnClick="@Abrir">Abrir diálogo</Button>
+
+    <Dialog id="firstDialog" Title="Primeiro diálogo" @bind-IsOpen="isOpen" Theme="@theme" Size="@size" Animation="@animation"
+            Fullscreen="@fullscreen" Scrollable="@scrollable" Centered="@centered" CloseOnBackdropClick="@closeOnBackdropClick">
+        <ChildContent>
+            <p>Este é um diálogo nativo do Bootstrap 6.</p>
+            @if (scrollable)
+            {
+                @for (var index = 1; index <= 18; index++)
+                {
+                    <p>Conteúdo de exemplo @index para demonstrar a rolagem independente do corpo.</p>
+                }
+            }
+        </ChildContent>
+        <FooterContent>
+            <Button Theme="ThemeColor.Primary" data-bs-toggle="dialog" data-bs-target="#secondDialog">Trocar de diálogo</Button>
+            <Button Theme="ThemeColor.Secondary" Appearance="ButtonStyle.Outline" OnClick="@Fechar">Fechar</Button>
+        </FooterContent>
+    </Dialog>
+
+    <Dialog id="secondDialog" Title="Segundo diálogo" Theme="@theme">
+        <ChildContent>O Bootstrap abre este diálogo antes de fechar o anterior, mantendo o backdrop visível.</ChildContent>
+        <FooterContent>
+            <Button Theme="ThemeColor.Primary" data-bs-toggle="dialog" data-bs-target="#firstDialog">Voltar ao primeiro</Button>
+            <Button Theme="ThemeColor.Secondary" Appearance="ButtonStyle.Outline" data-bs-dismiss="dialog">Fechar</Button>
+        </FooterContent>
+    </Dialog>
+</CodeExample>
+
+@code {
+    private bool isOpen;
+    private DialogSize size;
+    private DialogAnimation animation = DialogAnimation.Fade;
+    private ThemeColor? theme;
+    private bool fullscreen;
+    private bool scrollable;
+    private bool centered = true;
+    private bool closeOnBackdropClick = true;
+
+    private void Abrir(MouseEventArgs _) => isOpen = true;
+    private void Fechar(MouseEventArgs _) => isOpen = false;
+
+    private string SizeAttribute => size == DialogSize.Default ? string.Empty : $" Size=\"DialogSize.{size}\"";
+    private string AnimationAttribute => animation == DialogAnimation.Fade ? string.Empty : $" Animation=\"DialogAnimation.{animation}\"";
+    private string ThemeAttribute => theme is { } value ? $" Theme=\"ThemeColor.{value}\"" : string.Empty;
+    private string FullscreenAttribute => fullscreen ? " Fullscreen" : string.Empty;
+    private string ScrollableAttribute => scrollable ? " Scrollable" : string.Empty;
+
+    private string Code => $"<Button OnClick=\"@Abrir\">Abrir diálogo</Button>\n\n<Dialog id=\"firstDialog\" Title=\"Primeiro diálogo\" @bind-IsOpen=\"isOpen\"{ThemeAttribute}{SizeAttribute}{AnimationAttribute}{FullscreenAttribute}{ScrollableAttribute} Centered=\"{Bool(centered)}\" CloseOnBackdropClick=\"{Bool(closeOnBackdropClick)}\">\n    <ChildContent>Conteúdo do primeiro diálogo.</ChildContent>\n    <FooterContent>\n        <Button Theme=\"ThemeColor.Primary\" data-bs-toggle=\"dialog\" data-bs-target=\"#secondDialog\">Trocar de diálogo</Button>\n        <Button Theme=\"ThemeColor.Secondary\" Appearance=\"ButtonStyle.Outline\" OnClick=\"@Fechar\">Fechar</Button>\n    </FooterContent>\n</Dialog>\n\n<Dialog id=\"secondDialog\" Title=\"Segundo diálogo\"{ThemeAttribute}>\n    <ChildContent>Conteúdo do segundo diálogo.</ChildContent>\n    <FooterContent>\n        <Button Theme=\"ThemeColor.Primary\" data-bs-toggle=\"dialog\" data-bs-target=\"#firstDialog\">Voltar ao primeiro</Button>\n        <Button Theme=\"ThemeColor.Secondary\" Appearance=\"ButtonStyle.Outline\" data-bs-dismiss=\"dialog\">Fechar</Button>\n    </FooterContent>\n</Dialog>\n\n@code {{\n    private bool isOpen;\n    private DialogSize size;\n    private DialogAnimation animation = DialogAnimation.Fade;\n    private ThemeColor? theme;\n    private bool fullscreen, scrollable, centered = true, closeOnBackdropClick = true;\n\n    private void Abrir(MouseEventArgs _) => isOpen = true;\n    private void Fechar(MouseEventArgs _) => isOpen = false;\n}}";
+}

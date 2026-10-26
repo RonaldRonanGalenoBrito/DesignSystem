@@ -1,0 +1,31 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormNumber<>))]
+
+<div class="options-panel">
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="colorScheme">
+            <option value="Inherit">Padrão</option>
+            <option value="Light">Claro</option>
+            <option value="Dark">Escuro</option>
+        </select>
+    </label>
+    <label>Tamanho
+        <select class="form-control form-control-sm mt-1" @bind="size">
+            @foreach (var value in Enum.GetValues<FormControlSize>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+</div>
+<CodeExample Code="@Code">
+<FormNumber TValue="decimal?" Label="Valor" StartIcon="currency-dollar" @bind-Value="amount" min="0" step="0.01" ColorScheme="@colorScheme" Size="@size" />
+<p class="small fg-2 mb-0">Valor: @(amount?.ToString() ?? "null")</p>
+</CodeExample>
+
+@code {
+    private FormColorScheme colorScheme = FormColorScheme.Inherit;
+    private FormControlSize size = FormControlSize.Medium;
+    private decimal? amount;
+    private string Code => "<FormNumber TValue=\"decimal?\" Label=\"Valor\" StartIcon=\"currency-dollar\" @bind-Value=\"amount\" min=\"0\" step=\"0.01\"" + ColorSchemeAttribute(colorScheme) + FormControlSizeAttribute(size) + " />"
+        + "\n\n@code { private decimal? amount; }";
+}
+
+

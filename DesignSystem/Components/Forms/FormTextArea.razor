@@ -4,26 +4,50 @@
     Name = "FormTextArea",
     Group = "Formulários",
     Description = "Texto multilinha com altura configurável e validação integrada.",
-    Code = "<FormTextArea Label=\"Observações\" @bind-Value=\"notes\" Rows=\"4\" />\n\n@code {\n    private string notes = \"\";\n}",
-    Guidance = "Rows deve ser maior que zero. Readonly impede edição, mantendo a seleção do texto. ClassExtra estiliza o contêiner; class estiliza o controle."
+    Code = "<FormTextArea Label=\"Observações\" @bind-Value=\"notes\" Rows=\"4\" EndIcon=\"chat-left-text\" />\n\n@code {\n    private string notes = \"\";\n}",
+    Guidance = "Rows deve ser maior que zero. StartIcon e EndIcon exibem ícones dentro do campo. Readonly impede edição, mantendo a seleção do texto. ClassExtra estiliza o contêiner; class estiliza o controle."
 )]
-<FieldLayout Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra" UseMarginBottom="@UseMarginBottom">
-    @if (UpdateOnInput)
+<FieldLayout Theme="@Theme" ColorScheme="@ColorScheme" Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra" UseMarginBottom="@UseMarginBottom">
+    @if (!string.IsNullOrWhiteSpace(StartIcon) || !string.IsNullOrWhiteSpace(EndIcon))
     {
-        <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
-            Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
-            disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly"
-            @oninput="AtualizarAoDigitar" />
+        <FormAdornment StartIcon="@StartIcon" EndIcon="@EndIcon" Size="@Size">
+            @if (UpdateOnInput)
+            {
+                <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-ghost", Size)"
+                    Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                    disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly"
+                    @oninput="AtualizarAoDigitar" />
+            }
+            else
+            {
+                <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-ghost", Size)"
+                    Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                    disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly" />
+            }
+        </FormAdornment>
     }
     else
     {
-        <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control")"
-            Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
-            disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly" />
+        @if (UpdateOnInput)
+        {
+            <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control", Size)"
+                Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly"
+                @oninput="AtualizarAoDigitar" />
+        }
+        else
+        {
+            <InputTextArea @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control", Size)"
+                Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" rows="@Rows" placeholder="@Placeholder" readonly="@Readonly" />
+        }
     }
 </FieldLayout>
 
 @code {
+    [ParameterDoc("Tamanho Bootstrap do campo: Small, Medium ou Large.", Default = "Medium")]
+    [Parameter] public FormControlSize Size { get; set; } = FormControlSize.Medium;
+
     [ParameterDoc("Quantidade de linhas visíveis; deve ser maior que zero.")]
     [Parameter] public int Rows { get; set; } = 3;
     [ParameterDoc("Texto de orientação ou opção vazia do select.")]
@@ -32,6 +56,10 @@
     [Parameter] public bool Readonly { get; set; }
     [ParameterDoc("Atualiza o valor a cada tecla digitada, em vez de aguardar a perda de foco.")]
     [Parameter] public bool UpdateOnInput { get; set; }
+    [ParameterDoc("Ícone Bootstrap exibido antes do campo.")]
+    [Parameter] public string? StartIcon { get; set; }
+    [ParameterDoc("Ícone Bootstrap exibido depois do campo.")]
+    [Parameter] public string? EndIcon { get; set; }
 
     private Task AtualizarAoDigitar(ChangeEventArgs evento) =>
         ChangeValue(evento.Value?.ToString() ?? string.Empty);

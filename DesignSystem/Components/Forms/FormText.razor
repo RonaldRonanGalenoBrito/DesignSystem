@@ -1,0 +1,87 @@
+@inherits FormFieldBase<string>
+@attribute [ComponentDoc(
+    Slug = "form-text",
+    Name = "FormText",
+    Group = "Formulários",
+    Description = "Campo de texto com rótulo, ajuda, validação e suporte a binding.",
+    Code = "<FormText Label=\"Pesquisar\" StartIcon=\"search\" @bind-Value=\"term\" />\n\n@code {\n    private string term = \"\";\n}",
+    Guidance = "O valor continua sendo string ao alterar Type. StartIcon e EndIcon exibem ícones dentro do campo; PrefixContent e SuffixContent criam um input-group. O binding atualiza no evento change. Use FormNumber e FormDatepicker para valores tipados."
+)]
+<FieldLayout Theme="@Theme" ColorScheme="@ColorScheme" Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra" UseMarginBottom="@UseMarginBottom">
+    @if (PrefixContent is not null || SuffixContent is not null)
+    {
+        <InputGroup Size="@InputGroupSize">
+            @PrefixContent
+            @if (!string.IsNullOrWhiteSpace(StartIcon) || !string.IsNullOrWhiteSpace(EndIcon))
+            {
+                <FormAdornment StartIcon="@StartIcon" EndIcon="@EndIcon" Size="@Size">
+                    @TextControl
+                </FormAdornment>
+            }
+            else
+            {
+                @TextControl
+            }
+            @SuffixContent
+        </InputGroup>
+    }
+    else if (!string.IsNullOrWhiteSpace(StartIcon) || !string.IsNullOrWhiteSpace(EndIcon))
+    {
+        <FormAdornment StartIcon="@StartIcon" EndIcon="@EndIcon" Size="@Size">
+            @TextControl
+        </FormAdornment>
+    }
+    else
+    {
+        @TextControl
+    }
+</FieldLayout>
+
+@code {
+    private RenderFragment TextControl => @<text>
+        @if (UpdateOnInput)
+        {
+            <InputText @attributes="AdditionalAttributes" id="@Id" class="@ControlClass(HasAdornment ? "form-ghost" : "shadow-none form-control", Size)"
+                Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" type="@Type" placeholder="@Placeholder" readonly="@Readonly"
+                @oninput="AtualizarAoDigitar" />
+        }
+        else
+        {
+            <InputText @attributes="AdditionalAttributes" id="@Id" class="@ControlClass(HasAdornment ? "form-ghost" : "shadow-none form-control", Size)"
+                Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" type="@Type" placeholder="@Placeholder" readonly="@Readonly" />
+        }
+    </text>;
+
+    private bool HasAdornment => !string.IsNullOrWhiteSpace(StartIcon) || !string.IsNullOrWhiteSpace(EndIcon);
+    private ButtonSize InputGroupSize => Size switch
+    {
+        FormControlSize.Small => ButtonSize.Small,
+        FormControlSize.Large => ButtonSize.Large,
+        _ => ButtonSize.Medium
+    };
+
+    [ParameterDoc("Tamanho Bootstrap do campo: Small, Medium ou Large.", Default = "Medium")]
+    [Parameter] public FormControlSize Size { get; set; } = FormControlSize.Medium;
+
+    [ParameterDoc("Tipo HTML do campo, como text, email ou password. O valor permanece string.")]
+    [Parameter] public string Type { get; set; } = "text";
+    [ParameterDoc("Texto de orientação ou opção vazia do select.")]
+    [Parameter] public string? Placeholder { get; set; }
+    [ParameterDoc("Impede alteração do valor pelo usuário.")]
+    [Parameter] public bool Readonly { get; set; }
+    [ParameterDoc("Atualiza o valor a cada tecla digitada, em vez de aguardar a perda de foco.")]
+    [Parameter] public bool UpdateOnInput { get; set; }
+    [ParameterDoc("Conteúdo exibido antes do campo dentro de um input-group.")]
+    [Parameter] public RenderFragment? PrefixContent { get; set; }
+    [ParameterDoc("Conteúdo exibido depois do campo dentro de um input-group.")]
+    [Parameter] public RenderFragment? SuffixContent { get; set; }
+    [ParameterDoc("Ícone Bootstrap exibido antes do campo.")]
+    [Parameter] public string? StartIcon { get; set; }
+    [ParameterDoc("Ícone Bootstrap exibido depois do campo.")]
+    [Parameter] public string? EndIcon { get; set; }
+
+    private Task AtualizarAoDigitar(ChangeEventArgs evento) =>
+        ChangeValue(evento.Value?.ToString() ?? string.Empty);
+}

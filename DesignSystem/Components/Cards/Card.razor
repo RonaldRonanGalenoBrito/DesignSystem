@@ -1,10 +1,11 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "card",
     Name = "Card",
     Group = "Conteúdo",
     Description = "Agrupe conteúdo com título, subtítulo e áreas de cabeçalho e rodapé.",
     Code = "<Card Title=\"Resumo do projeto\" Subtitle=\"Atualizado hoje\" Shadow>\n    <ChildContent>As informações mais importantes em um só lugar.</ChildContent>\n    <FooterContent>Última atualização: agora</FooterContent>\n</Card>",
-    Guidance = "HeaderContent substitui Title e Subtitle. BodyClass, HeaderClass e FooterClass permitem aplicar utilitários Bootstrap a cada área."
+    Guidance = "Theme define a cor do card. Subtle usa card-subtle para aplicar tons suaves ao cabeçalho, rodapé e bordas. HeaderContent substitui Title e Subtitle. BodyClass, HeaderClass e FooterClass permitem aplicar utilitários Bootstrap a cada área."
 )]
 
 <div @attributes="AdditionalAttributes" class="@GetCssClasses()">
@@ -20,7 +21,7 @@
                 <h5 class="card-title mb-0">@Title</h5>
                 @if (!string.IsNullOrEmpty(Subtitle))
                 {
-                    <h6 class="card-subtitle text-muted mt-1 mb-0">@Subtitle</h6>
+                    <h6 class="card-subtitle fg-2 mt-1 mb-0">@Subtitle</h6>
                 }
             }
         </div>
@@ -55,6 +56,8 @@
     [ParameterDoc("Aplica a sombra Bootstrap shadow-sm.")]
 
     [Parameter] public bool Shadow { get; set; } = true;
+    [Parameter, ParameterDoc("Usa a variante nativa card-subtle, com cores suaves no cabeçalho, rodapé e bordas. Combine com Theme.")]
+    public bool Subtle { get; set; }
     [ParameterDoc("Classes do cabeçalho do card.")]
     [Parameter] public string? HeaderClass { get; set; }
     [ParameterDoc("Classes do corpo do card.")]
@@ -73,10 +76,11 @@
     {
         var classes = new List<string> { "card" };
 
+        if (Subtle) classes.Add("card-subtle");
         if (Shadow) classes.Add("shadow-sm");
         if (!string.IsNullOrWhiteSpace(ClassExtra)) classes.Add(ClassExtra);
 
-        return ComponentAttributes.Classes(AdditionalAttributes, classes.ToArray());
+        return ThemedClasses(AdditionalAttributes, classes.ToArray());
     }
 }
 

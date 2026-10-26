@@ -3,16 +3,45 @@
 
 <CodeExample Code="@Code">
 <div class="layout-preview">
-    <AppShell Title="Meu sistema">
+    <AppShell>
+        <HeaderContent>
+            <Header>
+                <BrandContent>
+                    <div><strong>Meu sistema</strong><div class="small fg-2">Portal de projetos</div></div>
+                </BrandContent>
+                <Actions><Button Theme="ThemeColor.Primary" Appearance="ButtonStyle.Outline"><Icon Name="person-circle" /> Perfil</Button></Actions>
+            </Header>
+        </HeaderContent>
         <SidebarContent>
             <Sidebar BackgroundColor="#1b6098" TextColor="#ffffff" ItemTextColor="#ffffff"
+                     ItemHoverBackgroundColor="#164d7a" ItemHoverTextColor="#ffffff"
                      ItemActiveBackgroundColor="#ffffff" ItemActiveTextColor="#1b6098">
-                <HeaderContent><strong><Icon Name="buildings" /> Meu projeto</strong></HeaderContent>
-                <ChildContent><SidebarItem Href="componentes/app-shell" Text="Início" Icon="house" Match="NavLinkMatch.All" /></ChildContent>
+                <HeaderContent>
+                    <div class="d-flex align-items-center gap-3">
+                        <Icon Name="buildings" SizeClass="fs-2xl" />
+                        <div><strong>Meu projeto</strong><div class="small">Área de trabalho</div></div>
+                    </div>
+                </HeaderContent>
+                <ChildContent>
+                    <SidebarItem Href="componentes/app-shell" Text="Visão geral" Icon="grid" Match="NavLinkMatch.All" />
+                    <SidebarItem Href="componentes/sidebar" Text="Projetos" Icon="folder2-open" />
+                    <SidebarItem Href="componentes/table" Text="Relatórios" Icon="graph-up" />
+                    <SidebarGroup Title="Administração" Icon="gear">
+                        <SidebarItem Href="componentes/button" Text="Preferências" Icon="sliders" />
+                    </SidebarGroup>
+                </ChildContent>
+                <FooterContent><span class="small">Workspace · Versão 1.0</span></FooterContent>
             </Sidebar>
         </SidebarContent>
-        <ChildContent><h2 class="h5">Bem-vindo</h2></ChildContent>
-        <FooterContent>Minha aplicação</FooterContent>
+        <ChildContent>
+            <h1 class="h4 mb-2">Visão geral</h1>
+            <p class="fg-2">Acompanhe os principais indicadores do seu projeto.</p>
+            <div class="row g-3 mt-2">
+                <div class="col-12 col-md-6"><Card Title="Projetos ativos"><ChildContent><strong class="fs-2xl">12</strong><p class="mb-0 fg-2">Em andamento</p></ChildContent></Card></div>
+                <div class="col-12 col-md-6"><Card Title="Tarefas concluídas"><ChildContent><strong class="fs-2xl">84</strong><p class="mb-0 fg-2">Neste mês</p></ChildContent></Card></div>
+            </div>
+        </ChildContent>
+        <FooterContent><span class="small fg-2">Meu sistema · 2026</span></FooterContent>
     </AppShell>
 </div>
 </CodeExample>

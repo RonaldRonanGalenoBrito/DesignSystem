@@ -1,19 +1,19 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "alert",
     Name = "Alert",
     Group = "Feedback",
     Description = "Mensagens contextuais de sucesso, informação, aviso e erro.",
-    Code = "<Alert Variant=\"AlertVariant.Success\" Dismissible @bind-Visible=\"visible\">Alterações salvas.</Alert>\n\n@code {\n    private bool visible = true;\n}",
+    Code = "<Alert Theme=\"ThemeColor.Success\" Dismissible @bind-Visible=\"visible\">Alterações salvas.</Alert>\n\n@code {\n    private bool visible = true;\n}",
     Guidance = "Use @bind-Visible para fechar e reabrir a mesma instância. Defina Floating e Position para exibir o alerta sobre o conteúdo. DismissLabel personaliza o texto acessível do botão de fechar."
 )]
 
 @if (isVisible)
 {
     <div @attributes="AdditionalAttributes" class="@GetCssClasses()" role="alert">
-        <div class="d-flex align-items-center">
             @if (ShowIcon)
             {
-                <Icon Name="@GetDefaultIcon()" ClassExtra="me-2 fs-5" />
+                <Icon Name="@GetDefaultIcon()" ClassExtra="me-2 fs-lg" />
             }
             <div class="flex-grow-1">
                 @ChildContent
@@ -22,15 +22,12 @@
             {
                 <button type="button" class="btn-close" aria-label="@DismissLabel" @onclick="CloseAlert"></button>
             }
-        </div>
     </div>
 }
 
 @code {
     [ParameterDoc("Conteúdo Razor interno.")]
     [Parameter] public RenderFragment? ChildContent { get; set; }
-    [ParameterDoc("Variante de cor ou apresentação.")]
-    [Parameter] public AlertVariant Variant { get; set; } = AlertVariant.Info;
     [ParameterDoc("Nome acessível do botão de fechar.")]
     [Parameter] public string DismissLabel { get; set; } = "Fechar";
     [ParameterDoc("Exibe o botão de fechar.")]
@@ -82,40 +79,39 @@
         var classes = new List<string>
         {
             "alert",
-            $"alert-{Variant.ToString().ToLowerInvariant()}"
+            $"theme-{ResolveTheme(ThemeColor.Info)}"
         };
 
-        if (Dismissible) classes.Add("alert-dismissible fade show");
+
         if (Floating)
         {
-            classes.Add("alert-floating");
-            classes.Add($"alert-floating-{ToKebabCase(Position)}");
+            classes.Add("alert-floating position-fixed m-4");
+            classes.Add(PositionClasses(Position));
         }
         if (!string.IsNullOrWhiteSpace(ClassExtra)) classes.Add(ClassExtra);
 
         return ComponentAttributes.Classes(AdditionalAttributes, classes.ToArray());
     }
 
-    private static string ToKebabCase(AlertPosition position) => position switch
+    private static string PositionClasses(AlertPosition position) => position switch
     {
-        AlertPosition.TopRight => "top-right",
-        AlertPosition.TopCenter => "top-center",
-        AlertPosition.TopLeft => "top-left",
-        AlertPosition.BottomRight => "bottom-right",
-        AlertPosition.BottomLeft => "bottom-left",
-        _ => "top-right"
+        AlertPosition.TopCenter => "top-0 start-50 translate-middle-x mx-0",
+        AlertPosition.TopLeft => "top-0 start-0",
+        AlertPosition.BottomRight => "bottom-0 end-0",
+        AlertPosition.BottomLeft => "bottom-0 start-0",
+        _ => "top-0 end-0"
     };
 
     private string GetDefaultIcon()
     {
         if (!string.IsNullOrEmpty(CustomIcon)) return CustomIcon;
 
-        return Variant switch
+        return ResolveTheme(ThemeColor.Info) switch
         {
-            AlertVariant.Success => "check-circle-fill",
-            AlertVariant.Danger => "exclamation-octagon-fill",
-            AlertVariant.Warning => "exclamation-triangle-fill",
-            AlertVariant.Info => "info-circle-fill",
+            "success" => "check-circle-fill",
+            "danger" => "exclamation-octagon-fill",
+            "warning" => "exclamation-triangle-fill",
+            "info" => "info-circle-fill",
             _ => "bell-fill"
         };
     }

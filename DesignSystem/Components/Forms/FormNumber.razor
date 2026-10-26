@@ -1,0 +1,45 @@
+@typeparam TValue
+@inherits FormFieldBase<TValue>
+@attribute [ComponentDoc(
+    Slug = "form-number",
+    TypeArguments = new[] { typeof(decimal?) },
+    Name = "FormNumber",
+    Group = "Formulários",
+    Description = "Entrada numérica tipada com conversão e mensagens de erro.",
+    Code = "<FormNumber TValue=\"decimal?\" Label=\"Valor\" StartIcon=\"currency-dollar\" @bind-Value=\"amount\" min=\"0\" step=\"0.01\" />\n\n@code {\n    private decimal? amount;\n}",
+    Guidance = "TValue aceita os tipos do InputNumber do Blazor, como int, long, float, double e decimal, inclusive anuláveis. StartIcon e EndIcon exibem ícones dentro do campo. min, max e step são atributos HTML; valide regras de negócio também no modelo."
+)]
+
+<FieldLayout Theme="@Theme" ColorScheme="@ColorScheme" Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra" UseMarginBottom="@UseMarginBottom">
+    @if (!string.IsNullOrWhiteSpace(StartIcon) || !string.IsNullOrWhiteSpace(EndIcon))
+    {
+        <FormAdornment StartIcon="@StartIcon" EndIcon="@EndIcon" Size="@Size">
+            <InputNumber TValue="TValue" @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-ghost", Size)"
+                Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" readonly="@Readonly" ParsingErrorMessage="@ParsingErrorMessage" />
+        </FormAdornment>
+    }
+    else
+    {
+        <InputNumber TValue="TValue" @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-control", Size)"
+            Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+            disabled="@Disabled" required="@Required" aria-invalid="@Invalid" aria-describedby="@DescribedBy" readonly="@Readonly" ParsingErrorMessage="@ParsingErrorMessage" />
+    }
+</FieldLayout>
+
+@code {
+    [ParameterDoc("Tamanho Bootstrap do campo: Small, Medium ou Large.", Default = "Medium")]
+    [Parameter] public FormControlSize Size { get; set; } = FormControlSize.Medium;
+
+    [ParameterDoc("Impede alteração do valor pelo usuário.")]
+    [Parameter] public bool Readonly { get; set; }
+    [ParameterDoc("Ícone Bootstrap exibido antes do campo.")]
+    [Parameter] public string? StartIcon { get; set; }
+    [ParameterDoc("Ícone Bootstrap exibido depois do campo.")]
+    [Parameter] public string? EndIcon { get; set; }
+    [ParameterDoc("Mensagem de conversão inválida; {0} recebe o nome do campo.")]
+    [Parameter] public string ParsingErrorMessage { get; set; } = "O campo {0} deve conter um número válido.";
+}
+
+
+

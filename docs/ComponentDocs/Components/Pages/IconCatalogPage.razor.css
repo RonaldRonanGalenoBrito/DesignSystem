@@ -1,0 +1,48 @@
+.icon-library { min-width: 0; }
+.icon-library-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 30px; }
+.icon-library-heading h1 { font-size: clamp(2rem, 4vw, 2.8rem); letter-spacing: -.035em; font-weight: 650; margin-bottom: 10px; }
+.icon-library-heading .doc-lead { max-width: 720px; margin-bottom: 0; }
+.icon-library-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 36px; align-items: start; }
+.icon-library-sidebar { position: sticky; top: 100px; max-height: calc(100dvh - 120px); overflow-y: auto; padding-right: 12px; scrollbar-width: thin; }
+.icon-library-package { display: grid; gap: 5px; padding: 12px; border: 1px solid var(--bs-border-color); border-radius: 8px; background: var(--bs-bg-2); margin-bottom: 22px; }
+.icon-library-package code { color: var(--manual-accent); font-size: .85rem; }
+.icon-library-package span { color: var(--bs-fg-2); font-size: .72rem; }
+.icon-library-sidebar-title { padding: 0 8px; margin-bottom: 7px; font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; font-weight: 650; color: var(--bs-fg-2); }
+.icon-letter-link { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 9px; border: 0; border-radius: 6px; background: transparent; color: var(--bs-fg-2); text-align: left; font-size: .82rem; }
+.icon-letter-link:hover { background: var(--bs-bg-2); color: var(--bs-fg-body); }
+.icon-letter-link.active { background: var(--bs-bg-2); color: var(--manual-accent); font-weight: 600; }
+.icon-letter-count { min-width: 29px; padding: 2px 6px; border-radius: 20px; background: var(--bs-bg-2); color: var(--bs-fg-2); text-align: center; font-size: .68rem; }
+.icon-letter-link.active .icon-letter-count { background: var(--manual-accent-soft); color: var(--manual-accent); }
+.icon-library-content { min-width: 0; }
+.icon-library-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 28px; }
+.icon-library-filter { flex: 1 1 280px; min-width: 180px; height: 42px; display: flex; align-items: center; gap: 10px; padding: 0 12px; border: 1px solid var(--bs-border-color); border-radius: 8px; background: var(--bs-bg-body); color: var(--bs-fg-2); }
+.icon-library-filter:focus-within { outline: 2px solid var(--manual-accent); outline-offset: 1px; }
+.icon-library-filter input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--bs-fg-body); font-size: .85rem; }
+.icon-filter-clear { border: 0; padding: 4px; background: transparent; color: var(--bs-fg-2); }
+.icon-filter-clear:hover { color: var(--bs-fg-body); }
+.icon-library-controls { display: flex; align-items: center; gap: 12px; }
+.icon-size-picker { display: inline-flex; border: 1px solid var(--bs-border-color); border-radius: 8px; overflow: hidden; }
+.icon-size-picker button { min-width: 42px; height: 40px; padding: 0 10px; border: 0; border-right: 1px solid var(--bs-border-color); background: var(--bs-bg-2); color: var(--bs-fg-2); font-size: .82rem; }
+.icon-size-picker button:last-child { border-right: 0; }
+.icon-size-picker button:hover { color: var(--bs-fg-body); }
+.icon-size-picker button.active { background: var(--bs-bg-body); color: var(--bs-fg-body); box-shadow: inset 0 0 0 1px var(--manual-accent); }
+.icon-theme-picker { display: flex; align-items: center; gap: 8px; white-space: nowrap; font-size: .78rem; color: var(--bs-fg-2); }
+.icon-theme-picker .form-control { min-width: 135px; width: auto; height: 40px; padding-top: 5px; padding-bottom: 5px; font-size: .82rem; }
+.icon-result-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 14px; margin-bottom: 18px; }
+.icon-result-heading h2 { font-size: .95rem; font-weight: 500; margin: 0; }
+.icon-result-heading span { color: var(--bs-fg-2); font-size: .78rem; }
+.icon-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 12px 14px; }
+.icon-card { min-width: 0; overflow: hidden; border: 1px solid var(--bs-border-color); border-radius: 8px; background: var(--bs-bg-2); text-align: center; }
+.icon-card-preview { height: 91px; display: grid; place-items: center; border-bottom: 1px solid var(--bs-border-color); color: var(--bs-fg-body); }
+.icon-card-name { overflow: hidden; padding: 8px 7px 4px; text-overflow: ellipsis; white-space: nowrap; font-size: .7rem; }
+.icon-card-actions { display: flex; justify-content: center; gap: 8px; padding: 3px 6px 7px; }
+.icon-card-actions button { display: grid; place-items: center; min-width: 30px; height: 27px; padding: 0 5px; border: 0; border-radius: 5px; background: transparent; color: var(--bs-fg-2); font-size: .78rem; }
+.icon-card-actions button:hover, .icon-card-actions button:focus-visible { background: var(--bs-bg-body); color: var(--manual-accent); }
+.icon-code-action { font-size: .68rem; font-weight: 600; }
+.icon-library-status { padding: 24px 0; color: var(--bs-fg-2); }
+.icon-empty-state { display: grid; justify-items: center; gap: 8px; padding: 60px 20px; border: 1px dashed var(--bs-border-color); border-radius: 10px; color: var(--bs-fg-2); }
+.icon-empty-state p { margin: 0; font-size: .9rem; }
+.icon-load-more { display: flex; justify-content: center; align-items: center; gap: 14px; padding: 26px 0; color: var(--bs-fg-2); font-size: .75rem; }
+@media (max-width: 1199.98px) { .icon-library-layout { grid-template-columns: 185px minmax(0, 1fr); gap: 24px; } .icon-library-toolbar { align-items: stretch; flex-direction: column; } .icon-library-controls { justify-content: space-between; } }
+@media (max-width: 767.98px) { .icon-library-layout { display: block; } .icon-library-sidebar { position: static; max-height: none; display: flex; overflow-x: auto; gap: 6px; padding: 0 0 14px; margin-bottom: 22px; } .icon-library-package, .icon-library-sidebar-title { display: none; } .icon-letter-link { width: auto; flex: 0 0 auto; border: 1px solid var(--bs-border-color); } .icon-library-controls { flex-wrap: wrap; } }
+@media (max-width: 575.98px) { .icon-library-heading { margin-bottom: 22px; } .icon-library-controls { align-items: stretch; } .icon-theme-picker { flex: 1; justify-content: space-between; } .icon-theme-picker .form-control { flex: 1; } .icon-card-grid { grid-template-columns: repeat(auto-fill, minmax(105px, 1fr)); gap: 9px; } .icon-card-preview { height: 76px; } }

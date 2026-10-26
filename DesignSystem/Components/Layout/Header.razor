@@ -1,20 +1,21 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "header",
     Name = "Header",
     Group = "Layout",
     Description = "Cabeçalho com marca, ações e botão de navegação mobile.",
-    Code = "<Header Title=\"Meu sistema\">\n    <Actions><Button Variant=\"ButtonVariant.OutlinePrimary\">Meu perfil</Button></Actions>\n</Header>",
+    Code = "<Header Title=\"Meu sistema\">\n    <Actions><Button Theme=\"ThemeColor.Primary\" Appearance=\"ButtonStyle.Outline\">Meu perfil</Button></Actions>\n</Header>",
     Guidance = "Dentro de AppShell, o botão mobile é coordenado automaticamente. Fora dele, use ShowMenuToggle, SidebarId, MenuOpen e OnMenuToggle para controlar um menu externo."
 )]
 
-<header @attributes="AdditionalAttributes" class="@ComponentAttributes.Classes(AdditionalAttributes, "navbar bg-body border-bottom px-3 py-2", ClassExtra)">
-    <div class="d-flex align-items-center gap-3 flex-wrap w-100">
+<header @attributes="AdditionalAttributes" class="@ThemedClasses(AdditionalAttributes, "navbar border-bottom px-4 py-2", Theme is null ? "bg-body" : "theme-subtle", ClassExtra)">
+    <div class="d-flex align-items-center gap-4 flex-wrap w-100">
         @if (Layout is not null || ShowMenuToggle)
         {
-            <button type="button" class="btn btn-outline-secondary d-lg-none"
+            <button type="button" class="btn btn-outline theme-secondary lg:d-none"
                     aria-label="@MenuLabel" aria-controls="@(Layout?.SidebarId ?? SidebarId)"
                     aria-expanded="@((Layout?.MenuOpen ?? MenuOpen) ? "true" : "false")" @onclick="Toggle">
-                <Icon Name="list" SizeClass="fs-5" />
+                <Icon Name="list" SizeClass="fs-lg" />
             </button>
         }
         <div class="me-auto">

@@ -1,4 +1,5 @@
-﻿@attribute [ComponentDoc(
+@inherits ThemedComponentBase
+@attribute [ComponentDoc(
     Slug = "row",
     Name = "Row",
     Group = "Layout",
@@ -25,7 +26,7 @@
     [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML adicionais da linha.")]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private string CssClass => ComponentAttributes.Classes(
+    private string CssClass => ThemedClasses(
         AdditionalAttributes,
         "row",
         GutterClass("g", Gutter),
@@ -40,7 +41,7 @@
         ValidateGutter(GutterY, nameof(GutterY));
     }
 
-    private static string? GutterClass(string prefix, int? value) => value is null ? null : $"{prefix}-{value}";
+    private static string? GutterClass(string prefix, int? value) => value is null ? null : $"{prefix}-{(value switch { 3 => 4, 4 => 6, 5 => 12, _ => value })}";
     private static void ValidateGutter(int? value, string name)
     {
         if (value is < 0 or > 5) throw new ArgumentOutOfRangeException(name, "O espaçamento deve estar entre 0 e 5.");

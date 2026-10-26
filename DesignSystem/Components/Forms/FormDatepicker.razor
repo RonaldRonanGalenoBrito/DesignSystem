@@ -1,0 +1,254 @@
+@typeparam TValue
+@inherits FormFieldBase<TValue>
+@implements IAsyncDisposable
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@attribute [ComponentDoc(
+    Slug = "form-datepicker",
+    TypeArguments = new[] { typeof(DateOnly?) },
+    Name = "FormDatepicker",
+    Group = "Formulários",
+    Description = "Datepicker Bootstrap para seleção única, múltipla ou intervalo.",
+    Code = "<FormDatepicker TValue=\"DateOnly?\" Label=\"Data localizada\" Locale=\"pt-BR\" EndIcon=\"calendar3\" @bind-Value=\"date\" />\n\n<FormDatepicker TValue=\"DateOnly[]\" Label=\"Várias datas\" SelectionMode=\"DatepickerSelectionMode.Multiple\" @bind-Value=\"dates\" />\n\n<FormDatepicker TValue=\"DateOnly[]\" Label=\"Intervalo\" SelectionMode=\"DatepickerSelectionMode.MultipleRanged\" Trigger=\"DatepickerTrigger.Button\" @bind-Value=\"range\" />\n\n<FormDatepicker TValue=\"DateOnly?\" Label=\"Calendário sempre visível\" Trigger=\"DatepickerTrigger.Inline\" @bind-Value=\"inlineDate\" />\n\n@code {\n    private DateOnly? date;\n    private DateOnly[] dates = [];\n    private DateOnly[] range = [];\n    private DateOnly? inlineDate;\n}",
+    Guidance = "FormDatepicker usa o Datepicker do Bootstrap 6. Trigger alterna entre Input, Button e Inline. SelectionMode oferece Single, Multiple e MultipleRanged. Use DateOnly? ou DateTime? para Single e arrays DateOnly[] ou DateTime[] para os modos múltiplo e intervalo. Também oferece limites, idioma, tema, posição, primeiro dia da semana, quantidade de meses, tamanho do campo ou botão e ícones internos."
+)]
+
+<FieldLayout Theme="@Theme" ColorScheme="@ColorScheme" Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra" UseMarginBottom="@UseMarginBottom">
+    @if (Trigger == DatepickerTrigger.Inline)
+    {
+        <div @attributes="VisibleAttributes" @ref="visibleElement" id="@Id" class="@InlineClass" data-bs-toggle="datepicker" data-bs-inline="true"
+             role="group" aria-label="@Label" aria-invalid="@Invalid" aria-required="@Required" aria-describedby="@DescribedBy">
+            @NativeControl
+        </div>
+    }
+    else if (Trigger == DatepickerTrigger.Button)
+    {
+        <button @attributes="ButtonAttributes" @ref="visibleElement" id="@Id" type="button" class="@ButtonClass"
+                data-bs-toggle="datepicker" aria-invalid="@Invalid" aria-describedby="@DescribedBy" disabled="@Disabled">
+            @if (!string.IsNullOrWhiteSpace(TriggerIcon)) { <Icon Name="@TriggerIcon" /> }
+            <span data-bs-datepicker-display>@TriggerText</span>
+        </button>
+        @NativeControl
+    }
+    else
+    {
+        @if (HasAdornment)
+        {
+            <FormAdornment StartIcon="@StartIcon" EndIcon="@EndIcon" Size="@Size">
+                @DateInput
+            </FormAdornment>
+        }
+        else
+        {
+            @DateInput
+        }
+        @NativeControl
+    }
+</FieldLayout>
+
+@code {
+    private ElementReference visibleElement;
+    private ElementReference nativeContainer;
+    private IJSObjectReference? module;
+    private IJSObjectReference? datepicker;
+    private DotNetObjectReference<FormDatepicker<TValue>>? receiver;
+    private string? activeConfig;
+
+    private RenderFragment DateInput => @<input @attributes="VisibleAttributes" @ref="visibleElement" id="@Id" type="text"
+        data-bs-toggle="datepicker" class="@ControlClass(HasAdornment ? "form-ghost" : $"form-control {InputSizeClass}")"
+        placeholder="@Placeholder" disabled="@Disabled" required="@Required" aria-invalid="@Invalid"
+        aria-describedby="@DescribedBy" readonly="@Readonly" autocomplete="off" />;
+
+    private RenderFragment NativeControl => @<span @ref="nativeContainer" class="visually-hidden">
+        @if (SelectionMode == DatepickerSelectionMode.Single)
+        {
+            <InputDate TValue="TValue" @attributes="NativeDateAttributes" id="@($"{Id}-value")" name="@NativeName"
+                tabindex="-1" aria-hidden="true" disabled="@Disabled"
+                Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
+                ParsingErrorMessage="@ParsingErrorMessage" />
+        }
+        else
+        {
+            <input type="hidden" name="@NativeName" value="@string.Join(",", GetSelectedDates())" disabled="@Disabled" />
+        }
+    </span>;
+
+    private bool HasAdornment => !string.IsNullOrWhiteSpace(StartIcon) || !string.IsNullOrWhiteSpace(EndIcon);
+    private string NativeName => ComponentAttributes.Get(AdditionalAttributes, "name") ?? $"{Id}-value";
+    private string ButtonClass => ComponentAttributes.Classes(ButtonAttributes, "btn-outline", $"theme-{ResolveTheme(ThemeColor.Secondary)}",
+        Size switch { FormControlSize.Small => "btn-sm", FormControlSize.Large => "btn-lg", _ => null });
+    private string InlineClass => ComponentAttributes.Classes(VisibleAttributes, "datepicker-inline", Disabled ? "pe-none opacity-50" : null);
+    private string? InputSizeClass => Size switch { FormControlSize.Small => "form-control-sm", FormControlSize.Large => "form-control-lg", _ => null };
+    private Dictionary<string, object>? VisibleAttributes => FilterAttributes(includeNative: false);
+    private Dictionary<string, object>? ButtonAttributes => FilterAttributes(includeNative: false);
+    private Dictionary<string, object>? NativeDateAttributes => FilterAttributes(includeNative: true);
+
+    [ParameterDoc("Tipo de acionador do calendário: Input, Button ou Inline.", Default = "Input")]
+    [Parameter] public DatepickerTrigger Trigger { get; set; } = DatepickerTrigger.Input;
+    [ParameterDoc("Modo de seleção: uma data, várias datas ou intervalo.", Default = "Single")]
+    [Parameter] public DatepickerSelectionMode SelectionMode { get; set; } = DatepickerSelectionMode.Single;
+    [ParameterDoc("Tamanho Bootstrap do campo ou do botão acionador.", Default = "Medium")]
+    [Parameter] public FormControlSize Size { get; set; } = FormControlSize.Medium;
+    [ParameterDoc("Impede a edição manual no modo Input; as datas ainda podem ser escolhidas no calendário.", Default = "true")]
+    [Parameter] public bool Readonly { get; set; } = true;
+    [ParameterDoc("Texto exibido quando não há data selecionada no modo Input.")]
+    [Parameter] public string? Placeholder { get; set; }
+    [ParameterDoc("Texto inicial do botão acionador.", Default = "Selecionar data")]
+    [Parameter] public string TriggerText { get; set; } = "Selecionar data";
+    [ParameterDoc("Ícone Bootstrap exibido no botão acionador.", Default = "calendar3")]
+    [Parameter] public string? TriggerIcon { get; set; } = "calendar3";
+    [ParameterDoc("Ícone Bootstrap exibido antes do campo no modo Input.")]
+    [Parameter] public string? StartIcon { get; set; }
+    [ParameterDoc("Ícone Bootstrap exibido depois do campo no modo Input.")]
+    [Parameter] public string? EndIcon { get; set; }
+    [ParameterDoc("Data mínima no formato ISO 8601 (yyyy-MM-dd).")]
+    [Parameter] public string? Min { get; set; }
+    [ParameterDoc("Data máxima no formato ISO 8601 (yyyy-MM-dd).")]
+    [Parameter] public string? Max { get; set; }
+    [ParameterDoc("Quantidade de meses exibidos no calendário.", Default = "1")]
+    [Parameter] public int DisplayMonthsCount { get; set; } = 1;
+    [ParameterDoc("Primeiro dia da semana: 0 para domingo até 6 para sábado.", Default = "1")]
+    [Parameter] public int FirstWeekday { get; set; } = 1;
+    [ParameterDoc("Idioma usado pelo calendário e pela formatação da data.", Default = "default")]
+    [Parameter] public string Locale { get; set; } = "default";
+    [ParameterDoc("Posição do calendário em relação ao campo.", Default = "Left")]
+    [Parameter] public DatepickerPlacement Placement { get; set; } = DatepickerPlacement.Left;
+    [ParameterDoc("Tema do calendário. Inherit segue o tema Bootstrap do elemento ancestral.", Default = "Inherit")]
+    [Parameter] public DatepickerTheme DatepickerTheme { get; set; } = DatepickerTheme.Inherit;
+    [ParameterDoc("Opções Intl.DateTimeFormat para personalizar a exibição da data.")]
+    [Parameter] public Dictionary<string, object>? DateFormat { get; set; }
+    [ParameterDoc("Mensagem de conversão inválida; {0} recebe o nome do campo.")]
+    [Parameter] public string ParsingErrorMessage { get; set; } = "O campo {0} deve conter uma data válida.";
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        var valueType = typeof(TValue);
+        if (SelectionMode == DatepickerSelectionMode.Single && valueType != typeof(DateOnly) && valueType != typeof(DateOnly?) && valueType != typeof(DateTime) && valueType != typeof(DateTime?))
+            throw new InvalidOperationException("FormDatepicker no modo Single requer TValue DateOnly, DateOnly?, DateTime ou DateTime?.");
+        if (SelectionMode != DatepickerSelectionMode.Single && !IsDateCollectionType(valueType))
+            throw new InvalidOperationException("FormDatepicker nos modos Multiple e MultipleRanged requer TValue DateOnly[], DateTime[] ou uma coleção correspondente.");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/DesignSystem/js/datepicker.js");
+        var config = GetConfigKey();
+        if (datepicker is null || activeConfig != config)
+        {
+            if (datepicker is not null)
+            {
+                await datepicker.InvokeVoidAsync("dispose");
+                await datepicker.DisposeAsync();
+            }
+            receiver ??= DotNetObjectReference.Create(this);
+            datepicker = await module.InvokeAsync<IJSObjectReference>("connect", visibleElement, nativeContainer, receiver, GetOptions());
+            activeConfig = config;
+        }
+        else
+        {
+            // Pass the date array as one JS argument, not as the params argument list.
+            await datepicker.InvokeVoidAsync("sync", (object)GetSelectedDates());
+        }
+    }
+
+    [JSInvokable]
+    public Task NotifyDatepickerSelection(string[] dates) => ChangeValueAndNotify(ConvertDates(dates));
+
+    private object GetOptions() => new
+    {
+        dateMin = Min ?? ComponentAttributes.Get(AdditionalAttributes, "min"),
+        dateMax = Max ?? ComponentAttributes.Get(AdditionalAttributes, "max"),
+        displayMonthsCount = Math.Max(1, DisplayMonthsCount),
+        firstWeekday = Math.Clamp(FirstWeekday, 0, 6),
+        locale = Locale,
+        placement = Placement.ToString().ToLowerInvariant(),
+        datepickerTheme = DatepickerTheme == DatepickerTheme.Inherit ? null : DatepickerTheme.ToString().ToLowerInvariant(),
+        dateFormat = DateFormat,
+        inline = Trigger == DatepickerTrigger.Inline,
+        selectionMode = SelectionMode switch
+        {
+            DatepickerSelectionMode.Multiple => "multiple",
+            DatepickerSelectionMode.MultipleRanged => "multiple-ranged",
+            _ => "single"
+        },
+        selectedDates = GetSelectedDates()
+    };
+
+    private string[] GetSelectedDates()
+    {
+        object? value = Value;
+        if (SelectionMode == DatepickerSelectionMode.Single)
+        {
+            var date = value switch
+            {
+                DateOnly d => d,
+                DateTime d => DateOnly.FromDateTime(d),
+                _ => (DateOnly?)null
+            };
+            return date is null ? [] : [date.Value.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)];
+        }
+
+        DateOnly[] dates = value switch
+        {
+            DateOnly[] items => items,
+            IReadOnlyCollection<DateOnly> items => items.ToArray(),
+            DateTime[] items => items.Select(DateOnly.FromDateTime).ToArray(),
+            IReadOnlyCollection<DateTime> items => items.Select(DateOnly.FromDateTime).ToArray(),
+            _ => []
+        };
+        return dates.Select(date => date.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)).ToArray();
+    }
+
+    private static bool IsDateCollectionType(Type type)
+    {
+        if (type == typeof(DateOnly[]) || type == typeof(DateTime[]) || type == typeof(List<DateOnly>) || type == typeof(List<DateTime>) ||
+            type == typeof(IReadOnlyList<DateOnly>) || type == typeof(IReadOnlyList<DateTime>) || type == typeof(IEnumerable<DateOnly>) || type == typeof(IEnumerable<DateTime>))
+            return true;
+        return false;
+    }
+
+    private TValue ConvertDates(string[] rawDates)
+    {
+        var dates = rawDates.Select(date => DateOnly.ParseExact(date, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture)).ToArray();
+        object result = typeof(TValue) switch
+        {
+            var type when type == typeof(DateOnly[]) || type == typeof(IReadOnlyList<DateOnly>) || type == typeof(IEnumerable<DateOnly>) => dates,
+            var type when type == typeof(List<DateOnly>) => dates.ToList(),
+            var type when type == typeof(DateTime[]) || type == typeof(IReadOnlyList<DateTime>) || type == typeof(IEnumerable<DateTime>) => dates.Select(date => date.ToDateTime(TimeOnly.MinValue)).ToArray(),
+            var type when type == typeof(List<DateTime>) => dates.Select(date => date.ToDateTime(TimeOnly.MinValue)).ToList(),
+            _ => throw new InvalidOperationException($"Tipo de coleção de datas não suportado: {typeof(TValue).Name}.")
+        };
+        return (TValue)result;
+    }
+
+    private Dictionary<string, object>? FilterAttributes(bool includeNative)
+    {
+        if (AdditionalAttributes is null) return null;
+        var nativeKeys = new[] { "min", "max", "name" };
+        return AdditionalAttributes
+            .Where(attribute => nativeKeys.Contains(attribute.Key, StringComparer.OrdinalIgnoreCase) == includeNative)
+            .ToDictionary(attribute => attribute.Key, attribute => attribute.Value);
+    }
+
+    private string GetConfigKey() => string.Join("|", Min, Max, DisplayMonthsCount, FirstWeekday, Locale,
+        Placement, DatepickerTheme, Trigger, SelectionMode, System.Text.Json.JsonSerializer.Serialize(DateFormat));
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (datepicker is not null)
+            {
+                await datepicker.InvokeVoidAsync("dispose");
+                await datepicker.DisposeAsync();
+            }
+            if (module is not null) await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        finally { receiver?.Dispose(); }
+    }
+}
+
+
+

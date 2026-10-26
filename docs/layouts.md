@@ -33,7 +33,7 @@ Substitua `NomeDaSuaAplicacao` pelo assembly da aplicação, não pelo nome da b
     <HeaderContent>
         <Header Title="Meu sistema">
             <Actions>
-                <span class="text-body-secondary">Olá, usuário</span>
+                <span class="fg-2">Olá, usuário</span>
             </Actions>
         </Header>
     </HeaderContent>
@@ -48,7 +48,7 @@ Substitua `NomeDaSuaAplicacao` pelo assembly da aplicação, não pelo nome da b
                 <SidebarItem Href="configuracoes" Text="Configurações" Icon="gear" />
             </ChildContent>
             <FooterContent>
-                <small class="text-body-secondary">Versão 1.0</small>
+                <small class="fg-2">Versão 1.0</small>
             </FooterContent>
         </Sidebar>
     </SidebarContent>
@@ -105,7 +105,7 @@ A largura do menu pode ser personalizada por uma variável CSS:
 
 Substitua o caminho da imagem pelo seu arquivo. `BackgroundColor` e `TextColor` definem o fundo e o texto do menu. As propriedades `ItemBackgroundColor`, `ItemTextColor`, `ItemHoverBackgroundColor`, `ItemHoverTextColor`, `ItemActiveBackgroundColor` e `ItemActiveTextColor` definem as cores dos links, inclusive dentro de grupos. No `SidebarItem`, use os mesmos nomes sem o prefixo `Item` para sobrescrever apenas aquele link. Os ícones acompanham a cor do texto.
 
-As cores aceitam `#RGB`, `#RGBA`, `#RRGGBB` e `#RRGGBBAA`. Null ou vazio mantém a herança/padrão Bootstrap. Cores explícitas permanecem iguais nos temas claro e escuro; escolha pares de fundo/texto com contraste legível. O foco por teclado usa as cores de hover e mantém o indicador de foco do Bootstrap. Classes como `text-body-secondary` no seu conteúdo podem sobrescrever a cor herdada.
+As cores aceitam `#RGB`, `#RGBA`, `#RRGGBB` e `#RRGGBBAA`. Null ou vazio mantém a herança/padrão Bootstrap. Cores explícitas permanecem iguais nos temas claro e escuro; escolha pares de fundo/texto com contraste legível. O foco por teclado usa as cores de hover e mantém o indicador de foco do Bootstrap. Classes como `fg-2` no seu conteúdo podem sobrescrever a cor herdada.
 
 ## Exemplo executável
 

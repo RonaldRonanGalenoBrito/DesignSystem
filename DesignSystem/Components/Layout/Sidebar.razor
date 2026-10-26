@@ -1,3 +1,4 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "sidebar",
     Name = "Sidebar",
@@ -7,12 +8,12 @@
     Guidance = "Use dentro de SidebarContent do AppShell para receber o comportamento responsivo. HeaderContent aceita texto, imagem ou qualquer composição Razor. BackgroundColor e TextColor aceitam hexadecimal; as propriedades Item definem as cores dos links. Label dá nome à região de navegação para leitores de tela."
 )]
 
-<div @attributes="AdditionalAttributes" style="@ColorStyle" class="@ComponentAttributes.Classes(AdditionalAttributes, "sidebar d-flex flex-column p-1 gap-3", ClassExtra)">
+<div @attributes="AdditionalAttributes" style="@ColorStyle" class="@ThemedClasses(AdditionalAttributes, "sidebar d-flex flex-column p-1 gap-4", ClassExtra)">
     @if (HeaderContent is not null)
     {
         <div>@HeaderContent</div>
     }
-    <nav class="nav nav-pills flex-column gap-1" aria-label="@Label">
+    <nav class="nav flex-column gap-1" aria-label="@Label">
         @ChildContent
     </nav>
     @if (FooterContent is not null)

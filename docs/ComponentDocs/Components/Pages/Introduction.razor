@@ -6,7 +6,7 @@
         <div class="eyebrow">Documentação / Introdução</div>
         <h1>Uma base para seus próximos projetos.</h1>
         <p class="doc-lead">Componentes Blazor com a familiaridade do Bootstrap. Explore os exemplos, ajuste os estilos e leve o código para sua aplicação.</p>
-        <div class="doc-meta"><span>@Catalog.All.Count componentes</span><span>.NET 8</span><span>Bootstrap 5.3.3</span><span>Bootstrap Icons 1.11.3</span></div>
+        <div class="doc-meta"><span>@Catalog.All.Count componentes</span><span>.NET 8</span><span>Bootstrap 6.0.0-alpha.1</span><span>Bootstrap Icons 1.13.2</span></div>
         <section id="instalacao" class="doc-section">
             <h2>Comece em poucos passos</h2>
             <h3>1. Referencie a biblioteca</h3>
@@ -16,15 +16,37 @@
             <pre class="install-code"><code>@Styles</code></pre>
             <h3>3. Importe os componentes</h3>
             <pre class="install-code"><code>@Imports</code></pre>
-            <p class="mt-3">Adicione esses imports ao <code>_Imports.razor</code>. A biblioteca não impõe render mode: no Blazor Web App, configure a interatividade no Routes/Router para habilitar cliques e binding.</p>
+            <p class="mt-4">Adicione esses imports ao <code>_Imports.razor</code>. A biblioteca não impõe render mode: no Blazor Web App, configure a interatividade no Routes/Router para habilitar cliques e binding.</p>
             <div class="usage-note">Este manual usa os componentes reais da biblioteca. O nome SIDEB permanece no projeto e nos namespaces; os nomes dos componentes são genéricos.</div>
+        </section>
+        <section id="temas" class="doc-section">
+            <h2>Um tema para todos os componentes</h2>
+            <p>Informe <code>Theme="ThemeColor.Success"</code> para usar os temas nativos do Bootstrap 6. No Button, Theme escolhe a cor e Appearance escolhe a apresentação visual.</p>
+            <label class="form-label" for="theme-preview">Tema dos exemplos</label>
+            <select id="theme-preview" class="form-control mb-4" @bind="previewTheme">
+                @foreach (var color in Enum.GetValues<ThemeColor>()) { <option value="@color">@color</option> }
+            </select>
+            <div class="d-flex flex-wrap align-items-center gap-4 mb-4">
+                <Button Theme="@previewTheme">Salvar</Button>
+                <Button Theme="@previewTheme" Appearance="ButtonStyle.Outline">Contorno</Button>
+                <Badge Theme="@previewTheme">Status</Badge>
+                <Spinner Theme="@previewTheme" Small />
+                <Icon Theme="@previewTheme" Name="check-circle" Label="Concluído" />
+            </div>
+            <Alert Theme="@previewTheme">O mesmo tema em diferentes componentes.</Alert>
+            <Card Theme="@previewTheme" Title="Resumo" ClassExtra="mb-4">Cabeçalho e bordas usam o tema nativo do card.</Card>
+            <FormSwitch Theme="@previewTheme" Label="Receber notificações" @bind-Value="notifications" />
+            <Progress Theme="@previewTheme" Value="65" ClassExtra="mb-4" />
+            <Pagination Theme="@previewTheme" PageCount="3" />
+            <pre class="install-code"><code>@ThemeCode</code></pre>
+            <p>Em Row, Column e outros contêineres, Theme disponibiliza os tokens para os filhos que os utilizam. Não adiciona fundo a todo elemento. Estados de validação e cores hexadecimais explícitas continuam tendo suas próprias regras.</p>
         </section>
         <section id="catalogo" class="doc-section">
             <h2>Explore os componentes</h2>
             <div class="catalog-grid">
                 @foreach (var item in Catalog.All)
                 {
-                    <a class="catalog-card" href="@($"componentes/{item.Slug}")"><strong>@item.Name <span class="float-end text-body-secondary">↗</span></strong><p>@item.Description</p></a>
+                    <a class="catalog-card" href="@($"componentes/{item.Slug}")"><strong>@item.Name <span class="float-end fg-2">↗</span></strong><p>@item.Description</p></a>
                 }
             </div>
         </section>
@@ -34,7 +56,7 @@
             <p>O projeto <code>samples/LayoutDemo</code> continua disponível como exemplo de aplicação. Este projeto, <code>docs/ComponentDocs</code>, é o manual e pode evoluir junto com a biblioteca.</p>
         </section>
     </article>
-    <aside class="doc-toc" aria-label="Nesta página"><strong>Nesta página</strong><a href="#instalacao">Instalação</a><a href="#catalogo">Componentes</a><a href="#sobre">Sobre o manual</a></aside>
+    <aside class="doc-toc" aria-label="Nesta página"><strong>Nesta página</strong><a href="#instalacao">Instalação</a><a href="#temas">Temas</a><a href="#catalogo">Componentes</a><a href="#sobre">Sobre o manual</a></aside>
 </div>
 
 

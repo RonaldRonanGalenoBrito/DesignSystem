@@ -1,9 +1,10 @@
-﻿@attribute [ComponentDoc(
+@inherits ThemedComponentBase
+@attribute [ComponentDoc(
     Slug = "column",
     Name = "Column",
     Group = "Layout",
     Description = "Coluna responsiva do grid Bootstrap com larguras e deslocamentos por breakpoint.",
-    Code = "<Row Gutter=\"3\">\n    <Column Size=\"12\" Md=\"8\">Conteúdo principal</Column>\n    <Column Size=\"12\" Md=\"4\">Complemento</Column>\n</Row>",
+    Code = "<Row Gutter=\"3\">\n    <Column Size=\"12\" Md=\"8\">Conteúdo principal</Column>\n    <Column Size=\"12\" Md=\"4\">Complemento</Column>\n    <Column Size=\"12\" Md=\"6\" OffsetMd=\"3\">Coluna centralizada</Column>\n</Row>",
     Guidance = "Size vale para todos os tamanhos; Sm, Md, Lg, Xl e Xxl sobrescrevem a largura nos breakpoints Bootstrap. Cada largura e Offset correspondente deve ficar entre 1 e 12. Sem largura, a coluna divide o espaço disponível automaticamente."
 )]
 
@@ -43,7 +44,7 @@
     [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML adicionais da coluna.")]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private string CssClass => ComponentAttributes.Classes(AdditionalAttributes,
+    private string CssClass => ThemedClasses(AdditionalAttributes,
         WidthClass(null, Size), WidthClass("sm", Sm), WidthClass("md", Md), WidthClass("lg", Lg), WidthClass("xl", Xl), WidthClass("xxl", Xxl),
         OffsetClass(null, Offset), OffsetClass("sm", OffsetSm), OffsetClass("md", OffsetMd), OffsetClass("lg", OffsetLg), OffsetClass("xl", OffsetXl), OffsetClass("xxl", OffsetXxl),
         HasWidth ? null : "col", ClassExtra);
@@ -56,8 +57,8 @@
         Validate(Offset, nameof(Offset)); Validate(OffsetSm, nameof(OffsetSm)); Validate(OffsetMd, nameof(OffsetMd)); Validate(OffsetLg, nameof(OffsetLg)); Validate(OffsetXl, nameof(OffsetXl)); Validate(OffsetXxl, nameof(OffsetXxl));
     }
 
-    private static string? WidthClass(string? breakpoint, int? value) => value is null ? null : breakpoint is null ? $"col-{value}" : $"col-{breakpoint}-{value}";
-    private static string? OffsetClass(string? breakpoint, int? value) => value is null ? null : breakpoint is null ? $"offset-{value}" : $"offset-{breakpoint}-{value}";
+    private static string? WidthClass(string? breakpoint, int? value) => value is null ? null : breakpoint is null ? $"col-{value}" : $"{(breakpoint == "xxl" ? "2xl" : breakpoint)}:col-{value}";
+    private static string? OffsetClass(string? breakpoint, int? value) => value is null ? null : breakpoint is null ? $"offset-{value}" : $"{(breakpoint == "xxl" ? "2xl" : breakpoint)}:offset-{value}";
     private static void Validate(int? value, string name)
     {
         if (value is < 1 or > 12) throw new ArgumentOutOfRangeException(name, "A largura e o deslocamento devem estar entre 1 e 12.");

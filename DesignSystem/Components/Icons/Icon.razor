@@ -1,13 +1,14 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "icon",
     Name = "Icon",
     Group = "Conteúdo",
     Description = "Ícones vetoriais da fonte Bootstrap Icons.",
-    Code = "<Icon Name=\"check-circle\" SizeClass=\"fs-3\" ClassExtra=\"text-success\" Label=\"Concluído\" />",
-    Guidance = "Informe Name sem o prefixo bi-. Sem Label, o ícone é decorativo e fica oculto de leitores de tela. A fonte Bootstrap Icons deve estar carregada."
+    Code = "<Icon Name=\"check-circle\" SizeClass=\"fs-2xl\" Theme=\"ThemeColor.Success\" Label=\"Concluído\" />",
+    Guidance = "Informe Name sem o prefixo bi-. Theme define a cor usando os utilitários fg-* do Bootstrap; sem Theme, o ícone herda a cor do conteúdo. Sem Label, o ícone é decorativo e fica oculto de leitores de tela. A fonte Bootstrap Icons deve estar carregada."
 )]
 
-<i @attributes="AdditionalAttributes" class="@ComponentAttributes.Classes(AdditionalAttributes, "bi", $"bi-{Name}", SizeClass, ClassExtra)" style="@(Style ?? ComponentAttributes.Get(AdditionalAttributes, "style"))" role="@(string.IsNullOrWhiteSpace(Label) ? null : "img")" aria-label="@Label" aria-hidden="@(string.IsNullOrWhiteSpace(Label) ? "true" : null)"></i>
+<i @attributes="AdditionalAttributes" class="@ThemedClasses(AdditionalAttributes, "bi", $"bi-{Name}", SizeClass, ThemeForegroundClass, ClassExtra)" style="@(Style ?? ComponentAttributes.Get(AdditionalAttributes, "style"))" role="@(string.IsNullOrWhiteSpace(Label) ? null : "img")" aria-label="@Label" aria-hidden="@(string.IsNullOrWhiteSpace(Label) ? "true" : null)"></i>
 
 @code {
     [ParameterDoc("Descrição acessível do ícone. Sem Label, o ícone é decorativo.")]
@@ -20,9 +21,9 @@
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Classe de tamanho do Bootstrap para tipografia (ex: "fs-1", "fs-2", "fs-5").
+    /// Classe de tamanho do Bootstrap para tipografia (ex: "fs-4xl", "fs-3xl", "fs-lg").
     /// </summary>
-    [ParameterDoc("Utilitário de tamanho, como fs-3.")]
+    [ParameterDoc("Utilitário de tamanho, como fs-2xl.")]
     [Parameter]
     public string? SizeClass { get; set; }
 

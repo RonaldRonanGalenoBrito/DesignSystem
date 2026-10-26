@@ -1,10 +1,11 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "button",
     Name = "Button",
     Group = "Ações",
-    Description = "Ações com variantes sólidas e de contorno, tamanhos e ícones.",
-    Code = "<Button Variant=\"ButtonVariant.Primary\">Salvar</Button>",
-    Guidance = "Use Type=Submit dentro de um EditForm."
+    Description = "Ações com tema, estilo, tamanho, arredondamento e ícones.",
+    Code = "<Button Theme=\"ThemeColor.Primary\" Appearance=\"ButtonStyle.Styled\" Size=\"ButtonSize.Medium\" Rounded=\"ButtonRounded.Pill\">Salvar</Button>",
+    Guidance = "Theme define a cor; Appearance define Styled, Solid, Outline, Subtle, Text ou Link; Size e Rounded são independentes. O padrão é Primary, Solid, Medium e Default. O atributo HTML style continua disponível para CSS inline. Use Type=Submit dentro de um EditForm."
 )]
 
 <button @attributes="AdditionalAttributes" type="@GetButtonTypeString()"
@@ -32,8 +33,10 @@
 @code {
     [ParameterDoc("Conteúdo Razor interno.")]
     [Parameter] public RenderFragment? ChildContent { get; set; }
-    [ParameterDoc("Cor do botão; inclui variantes sólidas, outline e link.")]
-    [Parameter] public ButtonVariant Variant { get; set; } = ButtonVariant.Primary;
+    [Parameter, ParameterDoc("Estilo do botão: Styled, Solid, Outline, Subtle, Text ou Link.")]
+    public ButtonStyle Appearance { get; set; } = ButtonStyle.Solid;
+    [Parameter, ParameterDoc("Arredondamento padrão, cápsula (Pill) ou cantos retos (Square). Square não altera a proporção do botão.")]
+    public ButtonRounded Rounded { get; set; }
     [ParameterDoc("Tamanho do botão.")]
     [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
     [ParameterDoc("Tipo HTML do botão: button, submit ou reset.")]
@@ -81,12 +84,24 @@
     {
         var classes = new List<string> { "btn" };
 
-        // Mapeia a variante (Primary -> btn-primary, OutlinePrimary -> btn-outline-primary)
-        classes.Add($"btn-{GetVariantClass(Variant)}");
+        classes.Add(Appearance switch
+        {
+            ButtonStyle.Styled => "btn-solid btn-styled",
+            ButtonStyle.Outline => "btn-outline",
+            ButtonStyle.Subtle => "btn-subtle",
+            ButtonStyle.Text => "btn-text",
+            ButtonStyle.Link => "btn-link",
+            _ => "btn-solid"
+        });
+        if (Appearance != ButtonStyle.Link || Theme is not null)
+            classes.Add($"theme-{ResolveTheme(ThemeColor.Primary)}");
+        if (Rounded == ButtonRounded.Pill) classes.Add("rounded-pill");
+        if (Rounded == ButtonRounded.Square) classes.Add("rounded-0");
 
         // Tamanho
         if (Size == ButtonSize.Small) classes.Add("btn-sm");
         if (Size == ButtonSize.Large) classes.Add("btn-lg");
+        if (Size == ButtonSize.ExtraSmall) classes.Add("btn-xs");
 
         // Largura total
         if (Block) classes.Add("w-100");
@@ -97,18 +112,4 @@
         return ComponentAttributes.Classes(AdditionalAttributes, classes.ToArray());
     }
 
-    private string GetVariantClass(ButtonVariant variant) => variant switch
-    {
-        ButtonVariant.OutlinePrimary => "outline-primary",
-        ButtonVariant.OutlineSecondary => "outline-secondary",
-        ButtonVariant.OutlineSuccess => "outline-success",
-        ButtonVariant.OutlineDanger => "outline-danger",
-        ButtonVariant.OutlineWarning => "outline-warning",
-        ButtonVariant.OutlineInfo => "outline-info",
-        ButtonVariant.OutlineLight => "outline-light",
-        ButtonVariant.OutlineDark => "outline-dark",
-        _ => variant.ToString().ToLowerInvariant()
-    };
 }
-
-

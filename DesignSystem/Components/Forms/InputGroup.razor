@@ -1,10 +1,11 @@
-﻿@attribute [ComponentDoc(
+@inherits ThemedComponentBase
+@attribute [ComponentDoc(
     Slug = "input-group",
     Name = "InputGroup",
     Group = "Formulários",
     Description = "Agrupa controles, textos e botões em uma única linha de formulário.",
-    Code = "<InputGroup>\n    <InputGroupText>R$</InputGroupText>\n    <input class=\"form-control\" placeholder=\"0,00\" />\n    <Button Variant=\"ButtonVariant.OutlinePrimary\">Calcular</Button>\n</InputGroup>",
-    Guidance = "Use InputGroupText para rótulos, moedas ou ícones. FormInputText aceita PrefixContent e SuffixContent para manter label e validação do campo."
+    Code = "<InputGroup>\n    <span class=\"input-group-text\">R$</span>\n    <input class=\"form-control\" placeholder=\"0,00\" />\n    <Button Theme=\"ThemeColor.Primary\" Appearance=\"ButtonStyle.Outline\">Calcular</Button>\n</InputGroup>",
+    Guidance = "Use a classe Bootstrap input-group-text em um span para exibir prefixos, moedas ou ícones. FormText aceita PrefixContent e SuffixContent para manter label e validação do campo."
 )]
 
 <div @attributes="AdditionalAttributes" class="@Classes">
@@ -12,7 +13,7 @@
 </div>
 
 @code {
-    [ParameterDoc("Conteúdo do grupo, como InputGroupText, controles e Button.")]
+    [ParameterDoc("Conteúdo do grupo, como um span com input-group-text, controles e Button.")]
     [Parameter] public RenderFragment? ChildContent { get; set; }
     [ParameterDoc("Tamanho dos controles no grupo.")]
     [Parameter] public ButtonSize Size { get; set; } = ButtonSize.Medium;
@@ -21,7 +22,7 @@
     [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private string Classes => ComponentAttributes.Classes(AdditionalAttributes,
+    private string Classes => ThemedClasses(AdditionalAttributes,
         "input-group",
         Size == ButtonSize.Small ? "input-group-sm" : null,
         Size == ButtonSize.Large ? "input-group-lg" : null,

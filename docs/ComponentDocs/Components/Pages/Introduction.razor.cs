@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 namespace ComponentDocs.Components.Pages;
 public partial class Introduction
 {
+    private DesignSystem.Enums.ThemeColor previewTheme = DesignSystem.Enums.ThemeColor.Success;
+    private bool notifications = true;
+    private string ThemeCode => $"<Button Theme=\"ThemeColor.{previewTheme}\" Appearance=\"ButtonStyle.Solid\">Salvar</Button>\n<Badge Theme=\"ThemeColor.{previewTheme}\">Status</Badge>\n<Alert Theme=\"ThemeColor.{previewTheme}\">Mensagem</Alert>";
 
     private const string ProjectReference = """
         <ProjectReference Include="../DesignSystem/DesignSystem.csproj" />

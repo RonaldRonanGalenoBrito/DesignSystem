@@ -17,7 +17,7 @@ public partial class ValidationExample
 
         <EditForm Model="@model">
             <DataAnnotationsValidator />
-            <FormInputText Label="Nome" @bind-Value="model.Name" />
+            <FormText Label="Nome" @bind-Value="model.Name" />
             <Button Type="ButtonType.Submit">Validar formulário</Button>
         </EditForm>
 

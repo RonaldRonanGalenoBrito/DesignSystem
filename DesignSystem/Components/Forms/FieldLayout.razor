@@ -1,7 +1,8 @@
-<div class="@ContainerCssClass">
+@inherits ThemedComponentBase
+<div data-bs-theme="@DataBsTheme" class="form-field @ThemeClass @ContainerCssClass">
     @if (!string.IsNullOrWhiteSpace(Label))
     {
-        <label for="@Id" class="form-label">@Label @if (Required) { <span class="text-danger" aria-hidden="true">*</span> }</label>
+        <label id="@($"{Id}-label")" for="@Id" class="form-label">@Label @if (Required) { <span class="fg-danger" aria-hidden="true">*</span> }</label>
     }
     @ChildContent
     @if (!string.IsNullOrWhiteSpace(HelpText))
@@ -27,13 +28,22 @@
     [Parameter] public string? ErrorMessage { get; set; }
     [ParameterDoc("Classes CSS adicionais. Nos campos, estiliza o contêiner.")]
     [Parameter] public string? ClassExtra { get; set; }
-    [ParameterDoc("Aplica a classe Bootstrap mb-3 ao contêiner do campo.", Default = "true")]
+    [ParameterDoc("Modo de cores Bootstrap do campo. Inherit usa o modo do elemento ancestral.", Default = "Inherit")]
+    [Parameter] public FormColorScheme ColorScheme { get; set; } = FormColorScheme.Inherit;
+    [ParameterDoc("Aplica a classe Bootstrap mb-4 ao contêiner do campo.", Default = "true")]
     [Parameter] public bool UseMarginBottom { get; set; } = true;
     [ParameterDoc("Conteúdo Razor interno.")]
     [Parameter] public RenderFragment? ChildContent { get; set; }
 
+    private string? DataBsTheme => ColorScheme switch
+    {
+        FormColorScheme.Light => "light",
+        FormColorScheme.Dark => "dark",
+        _ => null
+    };
+
     private string ContainerCssClass => UseMarginBottom
-        ? $"mb-3 {ClassExtra}"
+        ? $"mb-4 {ClassExtra}"
         : ClassExtra ?? string.Empty;
 }
 

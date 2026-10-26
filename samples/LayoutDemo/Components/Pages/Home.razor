@@ -1,6 +1,6 @@
 @page "/"
 
-<Alert Variant="AlertVariant.Info">
+<Alert Theme="ThemeColor.Info">
     <div class="text-center">
         <strong>Atenção</strong><br />
         Sistema disponível em dias úteis das 06:00 ás 21:00 horas.<br />
@@ -21,34 +21,34 @@
   </div>
 </div>
 
-<div class="card mt-3">
+<div class="card mt-4">
     <div class="card-body">
-        <h2 class="h5">Demonstração de modal</h2>
-        <p class="mb-3">Abra uma janela modal controlada por estado Blazor.</p>
-        <Button OnClick="@AbrirModal">Abrir modal</Button>
+        <h2 class="h5">Demonstração de diálogo</h2>
+        <p class="mb-4">Abra um diálogo controlado por estado Blazor.</p>
+        <Button OnClick="@AbrirDialog">Abrir diálogo</Button>
     </div>
 </div>
 
 @if (acaoConfirmada)
 {
-    <Alert Variant="AlertVariant.Success" ClassExtra="mt-3">
+    <Alert Theme="ThemeColor.Success" ClassExtra="mt-4">
         A ação de demonstração foi confirmada.
     </Alert>
 }
 
-<Modal Title="Confirmar ação" @bind-IsOpen="modalAberto" Centered>
+<Dialog Title="Confirmar ação" @bind-IsOpen="dialogAberto" Centered>
     <ChildContent>
         Deseja confirmar esta ação de demonstração?
     </ChildContent>
     <FooterContent>
-        <Button Variant="ButtonVariant.OutlineSecondary" OnClick="@FecharModal">Cancelar</Button>
-        <Button Variant="ButtonVariant.Primary" OnClick="@ConfirmarAcao">Confirmar</Button>
+        <Button Theme="ThemeColor.Secondary" Appearance="ButtonStyle.Outline" OnClick="@FecharDialog">Cancelar</Button>
+        <Button Theme="ThemeColor.Primary" OnClick="@ConfirmarAcao">Confirmar</Button>
     </FooterContent>
-</Modal>
+</Dialog>
 
-<Alert Variant="AlertVariant.Warning" ClassExtra="mt-3">
-    <div class="ms-3">
-        <div class="text-center mb-3"><strong>Aviso Importante</strong></div>
+<Alert Theme="ThemeColor.Warning" ClassExtra="mt-4">
+    <div class="ms-4">
+        <div class="text-center mb-4"><strong>Aviso Importante</strong></div>
         <p>Este sistema de emissão de <strong>Certidão Negativa</strong> está em <strong>fase de testes e validação</strong> (produção assistida). Isso significa que o sistema já está funcionando, mas ainda pode passar por ajustes. Neste momento, o acesso está restrito.</p>
         <p>Sua colaboração é essencial para garantir que tudo funcione corretamente. Caso encontre qualquer erro, dificuldade ou tenha sugestões de melhoria, envie seu feedback pelo seguinte canal:</p>
         <p><b>E-mail:</b> sideb_scrum@fazenda.sp.gov.br</p>
@@ -57,16 +57,16 @@
 </Alert>
 
 @code {
-    private bool modalAberto;
+    private bool dialogAberto;
     private bool acaoConfirmada;
 
-    private void AbrirModal(MouseEventArgs _) => modalAberto = true;
+    private void AbrirDialog(MouseEventArgs _) => dialogAberto = true;
 
-    private void FecharModal(MouseEventArgs _) => modalAberto = false;
+    private void FecharDialog(MouseEventArgs _) => dialogAberto = false;
 
     private void ConfirmarAcao(MouseEventArgs _)
     {
         acaoConfirmada = true;
-        modalAberto = false;
+        dialogAberto = false;
     }
 }

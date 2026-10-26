@@ -1,14 +1,18 @@
-﻿@typeparam TValue
+@inherits ThemedComponentBase
+@typeparam TValue
 
-<div class="form-check @ClassExtra">
+<div class="d-flex align-items-center gap-2 @ClassExtra">
     <InputRadio TValue="TValue" @attributes="AdditionalAttributes" id="@Id" class="@InputClass" Value="@Value" disabled="@Disabled" />
     @if (!string.IsNullOrWhiteSpace(Label))
     {
-        <label class="form-check-label" for="@Id">@Label</label>
+        <label class="form-label" for="@Id">@Label</label>
     }
 </div>
 
 @code {
+    [CascadingParameter] private FormControlSize? GroupSize { get; set; }
+    [ParameterDoc("Tamanho individual da opção; por padrão, herda FormRadioGroup.", Default = "Herdado do grupo")]
+    [Parameter] public FormControlSize? Size { get; set; }
     [Parameter] public string Id { get; set; } = $"radio-{Guid.NewGuid():N}";
     [Parameter] public string? Label { get; set; }
     [Parameter] public TValue Value { get; set; } = default!;
@@ -16,5 +20,7 @@
     [Parameter] public string? ClassExtra { get; set; }
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
 
-    private string InputClass => ComponentAttributes.Classes(AdditionalAttributes, "form-check-input");
+    private FormControlSize ResolvedSize => Size ?? GroupSize ?? FormControlSize.Medium;
+    private string InputClass => ThemedClasses(AdditionalAttributes, "radio",
+        ResolvedSize switch { FormControlSize.Small => "radio-sm", FormControlSize.Large => "radio-lg", _ => null });
 }

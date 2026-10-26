@@ -14,14 +14,14 @@ else
             <div class="eyebrow">@entry.Group / Componentes</div>
             <h1>@entry.Name</h1>
             <p class="doc-lead">@entry.Description</p>
-            <div class="doc-meta"><span>Blazor</span><span>Bootstrap 5.3</span><span>@(entry.ComponentType.IsGenericType ? $"Componente genérico · {string.Join(", ", entry.ComponentType.GetGenericTypeDefinition().GetGenericArguments().Select(type => type.Name))}" : "Componente Razor")</span></div>
+            <div class="doc-meta"><span>Blazor</span><span>Bootstrap 6 alpha</span><span>@(entry.ComponentType.IsGenericType ? $"Componente genérico · {string.Join(", ", entry.ComponentType.GetGenericTypeDefinition().GetGenericArguments().Select(type => type.Name))}" : "Componente Razor")</span></div>
             <section id="exemplos" class="doc-section">
                 <h2>Exemplos</h2>
-                <p class="text-body-secondary">Experimente o componente abaixo. O código Razor pode ser copiado para seu projeto.</p>
+                <p class="fg-2">Experimente o componente abaixo. O código Razor pode ser copiado para seu projeto.</p>
                 <Showcase Entry="@entry" @key="entry.Slug" />
                 @if (!string.IsNullOrWhiteSpace(entry.Code))
                 {
-                    <details class="mt-3">
+                    <details class="mt-4">
                         <summary>Exemplo declarado no componente</summary>
                         <CodeExample Code="@entry.Code" />
                     </details>
@@ -32,7 +32,7 @@ else
                 <div class="usage-note">@entry.Guidance</div>
                 <h3>Namespace</h3>
                 <pre class="install-code"><code>@($"@using {entry.ComponentType.Namespace}")</code></pre>
-                <p class="small text-body-secondary mt-2">Adicione também <code>@@using DesignSystem.Enums</code>. Eventos e binding precisam de um render mode interativo configurado na aplicação.</p>
+                <p class="small fg-2 mt-2">Adicione também <code>@@using DesignSystem.Enums</code>. Eventos e binding precisam de um render mode interativo configurado na aplicação.</p>
                 @if (entry.Group == "Formulários")
                 {
                     <h3>Validação com EditForm</h3>
@@ -42,12 +42,21 @@ else
             </section>
             <section id="estilos" class="doc-section">
                 <h2>Estilos e personalização</h2>
+                @if (entry.Slug == "button")
+                {
+                    <p>Use <code>Theme</code> para escolher a cor, <code>Appearance</code> para o estilo e <code>Rounded</code> para o arredondamento. O tamanho é definido separadamente por <code>Size</code>.</p>
+                }
+                else
+                {
+                    <p>Todos os componentes aceitam <code>Theme="ThemeColor.Success"</code>. Nos componentes com <code>Variant</code>, o tema substitui a cor da variante. Os padrões visuais próprios de cada componente continuam independentes.</p>
+                }
+                <p>O efeito segue os recursos nativos do Bootstrap: cores e estados nos componentes visuais, e tokens herdados nos contêineres de layout. Theme não altera as mensagens nem os estados de validação. <a href="./#temas">Veja os temas na introdução.</a></p>
                 <p>Use <code>ClassExtra</code> e os utilitários Bootstrap para espaçamento, bordas e cores. Atributos <code>class</code> adicionais são combinados com as classes do componente.</p>
                 @if (entry.Group == "Formulários")
                 {
                     <p><code>ClassExtra</code> estiliza o contêiner; <code>class</code> estiliza o controle. Use <code>Disabled</code>, <code>ErrorMessage</code> e, nos campos de texto, <code>Readonly</code> para configurar o estado.</p>
                 }
-                @if (entry.Slug is "badge" or "alert" or "button" or "spinner" or "progress-bar")
+                @if (entry.Slug is "badge" or "alert" or "button" or "spinner" or "progress")
                 {
                     <p>As opções de cor e estado podem ser testadas nos controles acima do exemplo. Veja todos os valores aceitos por cada enum na referência abaixo.</p>
                 }
@@ -55,14 +64,14 @@ else
                 {
                     <p>Carregue <code>NomeDaSuaAplicacao.styles.css</code> no host para incluir o CSS isolado. A largura do menu pode ser ajustada com <code>--app-sidebar-width: 19rem</code> no AppShell.</p>
                 }
-                <p class="small text-body-secondary">O alternador no header permite conferir a aparência em tema claro e escuro. As cores seguem as variáveis do Bootstrap.</p>
+                <p class="small fg-2">O alternador no header permite conferir a aparência em tema claro e escuro. As cores seguem as variáveis do Bootstrap.</p>
             </section>
             <section id="parametros" class="doc-section">
                 <h2>Referência de parâmetros</h2>
-                <p class="text-body-secondary small">Nomes, tipos, valores padrão e opções de enums são obtidos diretamente do componente compilado. Inclui parâmetros herdados. Tipos de referência podem aceitar null; consulte a coluna Padrão.</p>
+                <p class="fg-2 small">Nomes, tipos, valores padrão e opções de enums são obtidos diretamente do componente compilado. Inclui parâmetros herdados. Tipos de referência podem aceitar null; consulte a coluna Padrão.</p>
                 @if (entry.ComponentType.IsGenericType)
                 {
-                    <p class="small text-body-secondary">Os padrões refletem a especialização configurada em ComponentDoc.TypeArguments. Os tipos da API preservam os nomes genéricos, como TValue.</p>
+                    <p class="small fg-2">Os padrões refletem a especialização configurada em ComponentDoc.TypeArguments. Os tipos da API preservam os nomes genéricos, como TValue.</p>
                 }
                 <div class="table-responsive">
                     <table class="table api-table align-top">
@@ -77,7 +86,7 @@ else
                     </table>
                 </div>
             </section>
-            <footer class="border-top mt-5 pt-3 small text-body-secondary">Exemplos executados com a biblioteca deste repositório. <a href="">Voltar à introdução</a></footer>
+            <footer class="border-top mt-12 pt-4 small fg-2">Exemplos executados com a biblioteca deste repositório. <a href="">Voltar à introdução</a></footer>
         </article>
         <aside class="doc-toc" aria-label="Nesta página">
             <strong>Nesta página</strong>

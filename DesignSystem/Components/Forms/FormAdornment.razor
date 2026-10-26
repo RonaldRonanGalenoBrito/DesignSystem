@@ -1,0 +1,39 @@
+@attribute [ComponentDoc(
+    Slug = "form-adornment",
+    Name = "FormAdornment",
+    Group = "Formulários",
+    Description = "Contêiner Bootstrap para campos com ícones ou texto adornado.",
+    Code = "<FormText Label=\"Pesquisar\" StartIcon=\"search\" @bind-Value=\"term\" />\n\n@code {\n    private string term = \"\";\n}",
+    Guidance = "Use StartIcon e EndIcon nos componentes Form para exibir ícones dentro do campo com as classes form-adorn e form-adorn-icon do Bootstrap. FormAdornment pode envolver um controle personalizado que use a classe form-ghost."
+)]
+
+<div @attributes="AdditionalAttributes" class="@Classes">
+    @if (!string.IsNullOrWhiteSpace(StartIcon))
+    {
+        <span class="@(string.IsNullOrWhiteSpace(EndIcon) ? "form-adorn-icon" : "form-adorn-icon order-first")"><Icon Name="@StartIcon" /></span>
+    }
+    @ChildContent
+    @if (!string.IsNullOrWhiteSpace(EndIcon))
+    {
+        <span class="form-adorn-icon"><Icon Name="@EndIcon" /></span>
+    }
+</div>
+
+@code {
+    [ParameterDoc("Nome do ícone Bootstrap exibido antes do controle.")]
+    [Parameter] public string? StartIcon { get; set; }
+    [ParameterDoc("Nome do ícone Bootstrap exibido depois do controle.")]
+    [Parameter] public string? EndIcon { get; set; }
+    [ParameterDoc("Controle interno, que deve usar a classe form-ghost.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Classes CSS adicionais do contêiner.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Tamanho Bootstrap do campo adornado.", Default = "Medium")]
+    [Parameter] public FormControlSize Size { get; set; } = FormControlSize.Medium;
+    [ParameterDoc("Atributos HTML adicionais do contêiner.")]
+    [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private string Classes => ComponentAttributes.Classes(AdditionalAttributes, "form-control", "form-adorn",
+        Size switch { FormControlSize.Small => "form-control-sm", FormControlSize.Large => "form-control-lg", _ => null },
+        string.IsNullOrWhiteSpace(EndIcon) ? null : "form-adorn-end", ClassExtra);
+}

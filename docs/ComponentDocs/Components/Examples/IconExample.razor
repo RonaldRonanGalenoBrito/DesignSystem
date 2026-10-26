@@ -1,12 +1,24 @@
 @inherits ExampleBase
 @attribute [ComponentExample(typeof(Icon))]
 
+<div class="options-panel">
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="theme">
+            <option value="">Padrão</option>
+            @foreach (var value in Enum.GetValues<ThemeColor>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+</div>
 <CodeExample Code="@Code">
-<Icon Name="check-circle" SizeClass="fs-3" ClassExtra="text-success" Label="Concluído" />
+<Icon Name="@selectedIcon" SizeClass="fs-2xl" Theme="@theme" Label="@selectedIcon" />
 </CodeExample>
 
+<p class="small fg-2 mt-3">Consulte e pesquise todos os ícones na <a href="icones">página dedicada ao catálogo de ícones</a>.</p>
+
 @code {
-    
-    private string Code => Entry.Code;
+    private string selectedIcon = "check-circle";
+    private ThemeColor? theme;
+    private string ThemeAttribute => theme is { } value ? $" Theme=\"ThemeColor.{value}\"" : string.Empty;
+    private string Code => $"<Icon Name=\"{selectedIcon}\" SizeClass=\"fs-2xl\"{ThemeAttribute} Label=\"{selectedIcon}\" />";
 }
 

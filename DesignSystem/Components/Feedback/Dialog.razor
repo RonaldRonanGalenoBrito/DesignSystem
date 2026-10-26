@@ -1,0 +1,138 @@
+@inherits ThemedComponentBase
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+@attribute [ComponentDoc(
+    Slug = "dialog",
+    Name = "Dialog",
+    Group = "Feedback",
+    Description = "Diálogo nativo controlado por estado Blazor, com animações, tamanhos e cabeçalho e rodapé opcionais.",
+    Code = "<Button OnClick=\"@(() => dialogAberto = true)\">Excluir</Button>\n\n<Dialog Title=\"Confirmar exclusão\" @bind-IsOpen=\"dialogAberto\" Animation=\"DialogAnimation.SlideDown\">\n    <ChildContent>Esta ação não poderá ser desfeita.</ChildContent>\n    <FooterContent>\n        <Button Theme=\"ThemeColor.Secondary\" Appearance=\"ButtonStyle.Outline\" OnClick=\"@(() => dialogAberto = false)\">Cancelar</Button>\n        <Button Theme=\"ThemeColor.Danger\">Excluir</Button>\n    </FooterContent>\n</Dialog>\n\n@code { private bool dialogAberto; }",
+    Guidance = "Theme aplica ao diálogo o fundo e o texto sutis da cor escolhida. Controle a abertura com @bind-IsOpen. Animation oferece Fade, Instant, SlideDown e SlideUp. Fullscreen ocupa a janela; Scrollable mantém cabeçalho e rodapé fixos enquanto o corpo rola. Para trocar de diálogo mantendo o backdrop, use um botão interno com data-bs-toggle=dialog e data-bs-target apontando para o id de outro Dialog."
+)]
+
+<dialog @ref="element" @attributes="AdditionalAttributes" class="@DialogClasses"
+        style="@DialogStyle"
+        aria-label="@(Title ?? AccessibleLabel)">
+    @if (HeaderContent is not null || !string.IsNullOrWhiteSpace(Title) || ShowCloseButton)
+    {
+        <div class="dialog-header">
+            @if (HeaderContent is not null) { @HeaderContent }
+            else if (!string.IsNullOrWhiteSpace(Title)) { <h1 class="dialog-title fs-lg">@Title</h1> }
+            @if (ShowCloseButton) { <button type="button" class="btn-close" aria-label="@CloseLabel" @onclick="Close"></button> }
+        </div>
+    }
+    <div class="dialog-body">@ChildContent</div>
+    @if (FooterContent is not null) { <div class="dialog-footer">@FooterContent</div> }
+</dialog>
+@code {
+    [ParameterDoc("Título exibido no cabeçalho padrão.")]
+    [Parameter] public string? Title { get; set; }
+    [ParameterDoc("Conteúdo personalizado do cabeçalho; substitui o título padrão.")]
+    [Parameter] public RenderFragment? HeaderContent { get; set; }
+    [ParameterDoc("Conteúdo principal do diálogo.")]
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Conteúdo personalizado do rodapé.")]
+    [Parameter] public RenderFragment? FooterContent { get; set; }
+    [ParameterDoc("Indica se o diálogo está aberto; aceita @bind-IsOpen.")]
+    [Parameter] public bool IsOpen { get; set; }
+    [ParameterDoc("Notifica a mudança de abertura do diálogo.")]
+    [Parameter] public EventCallback<bool> IsOpenChanged { get; set; }
+    [ParameterDoc("Exibe o botão X no cabeçalho.")]
+    [Parameter] public bool ShowCloseButton { get; set; } = true;
+    [ParameterDoc("Fecha o diálogo ao clicar fora do conteúdo.")]
+    [Parameter] public bool CloseOnBackdropClick { get; set; } = true;
+    [ParameterDoc("Tamanho do diálogo.")]
+    [Parameter] public DialogSize Size { get; set; }
+    [ParameterDoc("Animação de entrada e saída. Fade é o padrão do Bootstrap.")]
+    [Parameter] public DialogAnimation Animation { get; set; } = DialogAnimation.Fade;
+    [ParameterDoc("Expande o diálogo para ocupar a janela inteira.")]
+    [Parameter] public bool Fullscreen { get; set; }
+    [ParameterDoc("Centraliza verticalmente o diálogo.")]
+    [Parameter] public bool Centered { get; set; }
+    [ParameterDoc("Mantém cabeçalho e rodapé visíveis quando o conteúdo tem rolagem.")]
+    [Parameter] public bool Scrollable { get; set; }
+    [ParameterDoc("Texto acessível do diálogo quando não houver título.")]
+    [Parameter] public string AccessibleLabel { get; set; } = "Caixa de diálogo";
+    [ParameterDoc("Texto acessível do botão de fechar.")]
+    [Parameter] public string CloseLabel { get; set; } = "Fechar";
+    [ParameterDoc("Classes CSS adicionais aplicadas ao elemento dialog.")]
+    [Parameter] public string? ClassExtra { get; set; }
+    [ParameterDoc("Notifica que o diálogo foi fechado por uma ação interna.")]
+    [Parameter] public EventCallback OnClosed { get; set; }
+    [Parameter(CaptureUnmatchedValues = true), ParameterDoc("Atributos HTML do elemento dialog.")]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool isOpen;
+    private bool? previousIsOpen;
+
+    private ElementReference element;
+    private IJSObjectReference? module;
+    private IJSObjectReference? dialog;
+    private DotNetObjectReference<Dialog>? receiver;
+    private bool? backdrop;
+    private bool shown;
+    private string DialogStyle => string.Join(";", new[] {
+        ComponentAttributes.Get(AdditionalAttributes, "style"),
+        Centered || Fullscreen ? null : "margin-block-start: var(--bs-dialog-margin)"
+    }.Where(value => !string.IsNullOrWhiteSpace(value)));
+
+    private string DialogClasses => ThemedClasses(AdditionalAttributes,
+        "dialog", Theme is null ? null : "theme-subtle", Size switch { DialogSize.Small => "dialog-sm", DialogSize.Large => "dialog-lg", DialogSize.ExtraLarge => "dialog-xl", _ => null },
+        Animation switch { DialogAnimation.Instant => "dialog-instant", DialogAnimation.SlideDown => "dialog-slide-down", DialogAnimation.SlideUp => "dialog-slide-up", _ => null },
+        Fullscreen ? "dialog-fullscreen" : null, Scrollable ? "dialog-scrollable" : null, ClassExtra);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/DesignSystem/js/dialog.js");
+        if (dialog is null || backdrop != CloseOnBackdropClick)
+        {
+            if (dialog is not null) { await dialog.InvokeVoidAsync("dispose"); await dialog.DisposeAsync(); }
+            receiver ??= DotNetObjectReference.Create(this);
+            dialog = await module.InvokeAsync<IJSObjectReference>("connect", element, receiver, CloseOnBackdropClick);
+            backdrop = CloseOnBackdropClick;
+            shown = false;
+        }
+        if (shown != isOpen)
+        {
+            shown = isOpen;
+            await dialog.InvokeVoidAsync(isOpen ? "show" : "hide");
+        }
+    }
+
+    [JSInvokable]
+    public async Task NotifyClosed()
+    {
+        shown = false;
+        await Close();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (dialog is not null) { await dialog.InvokeVoidAsync("dispose"); await dialog.DisposeAsync(); }
+            if (module is not null) await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        finally { receiver?.Dispose(); }
+    }
+    protected override void OnParametersSet()
+    {
+        if (previousIsOpen != IsOpen)
+            isOpen = IsOpen;
+        previousIsOpen = IsOpen;
+    }
+
+
+
+    private async Task Close()
+    {
+        if (!isOpen) return;
+
+        isOpen = false;
+        await IsOpenChanged.InvokeAsync(false);
+        await OnClosed.InvokeAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+}

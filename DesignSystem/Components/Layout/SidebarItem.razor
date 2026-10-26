@@ -1,3 +1,4 @@
+@inherits ThemedComponentBase
 @using Microsoft.AspNetCore.Components.Routing
 @attribute [ComponentDoc(
     Slug = "sidebar-item",
@@ -65,7 +66,7 @@ else
     [Parameter] public string? ClassExtra { get; set; }
     [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
-    private string CssClass => ComponentAttributes.Classes(AdditionalAttributes, "sidebar-link nav-link d-flex align-items-center gap-2", Disabled ? "disabled" : null, ClassExtra);
+    private string CssClass => ThemedClasses(AdditionalAttributes, "sidebar-link nav-link d-flex align-items-center gap-2", Disabled ? "disabled" : null, ClassExtra);
     private Dictionary<string, object>? DisabledAttributes => AdditionalAttributes?
         .Where(pair => !pair.Key.StartsWith("on", StringComparison.OrdinalIgnoreCase) &&
             !new[] { "href", "tabindex", "target" }.Contains(pair.Key, StringComparer.OrdinalIgnoreCase))

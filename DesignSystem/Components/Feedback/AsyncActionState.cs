@@ -8,7 +8,7 @@ public class AsyncActionState
     public bool IsLoading { get; private set; }
     public bool IsAlertVisible { get; set; }
     public string Message { get; private set; } = string.Empty;
-    public AlertVariant Variant { get; private set; } = AlertVariant.Success;
+    public ThemeColor Theme { get; private set; } = ThemeColor.Success;
 
     public void Begin()
     {
@@ -17,23 +17,23 @@ public class AsyncActionState
         Message = string.Empty;
     }
 
-    public void Succeed(string message) => Complete(message, AlertVariant.Success);
+    public void Succeed(string message) => Complete(message, ThemeColor.Success);
 
-    public void Fail(string message) => Complete(message, AlertVariant.Danger);
+    public void Fail(string message) => Complete(message, ThemeColor.Danger);
 
     public virtual void Reset()
     {
         IsLoading = false;
         IsAlertVisible = false;
         Message = string.Empty;
-        Variant = AlertVariant.Success;
+        Theme = ThemeColor.Success;
     }
 
-    private void Complete(string message, AlertVariant variant)
+    private void Complete(string message, ThemeColor theme)
     {
         IsLoading = false;
         Message = message;
-        Variant = variant;
+        Theme = theme;
         IsAlertVisible = true;
     }
 }

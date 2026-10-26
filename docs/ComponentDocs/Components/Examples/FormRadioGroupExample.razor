@@ -1,16 +1,33 @@
 @inherits ExampleBase
 @attribute [ComponentExample(typeof(FormRadioGroup<>))]
 
+<div class="options-panel">
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="theme">
+            <option value="">Padrão</option>
+            @foreach (var value in Enum.GetValues<ThemeColor>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+    <label>Tamanho
+        <select class="form-control form-control-sm mt-1" @bind="size">
+            @foreach (var value in Enum.GetValues<FormControlSize>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+</div>
+
 <CodeExample Code="@Code">
-    <FormRadioGroup TValue="string" Label="Forma de entrega" @bind-Value="delivery">
+    <FormRadioGroup TValue="string" Theme="@theme" Size="@size" Label="Forma de entrega" @bind-Value="delivery">
         <FormRadio TValue="string" Value="@("standard")" Label="Padrão" />
         <FormRadio TValue="string" Value="@("express")" Label="Expressa" />
         <FormRadio TValue="string" Value="@("pickup")" Label="Retirada" />
     </FormRadioGroup>
-    <p class="small text-body-secondary mb-0">Selecionado: @delivery</p>
+    <p class="small fg-2 mb-0">Selecionado: @delivery</p>
 </CodeExample>
 
 @code {
     private string delivery = "standard";
-    private string Code => Entry.Code;
+    private ThemeColor? theme;
+    private FormControlSize size = FormControlSize.Medium;
+    private string ThemeAttribute => theme is { } value ? $" Theme=\"ThemeColor.{value}\"" : string.Empty;
+    private string Code => $"<FormRadioGroup TValue=\"string\"{ThemeAttribute}{FormControlSizeAttribute(size)} Label=\"Forma de entrega\" @bind-Value=\"delivery\">\n    <FormRadio TValue=\"string\" Value=\"@(\"standard\")\" Label=\"Padrão\" />\n    <FormRadio TValue=\"string\" Value=\"@(\"express\")\" Label=\"Expressa\" />\n    <FormRadio TValue=\"string\" Value=\"@(\"pickup\")\" Label=\"Retirada\" />\n</FormRadioGroup>\n\n@code {{ private string delivery = \"standard\"; }}";
 }

@@ -1,0 +1,243 @@
+@typeparam TValue
+@inherits FormFieldBase<TValue>
+@implements IAsyncDisposable
+@using Microsoft.JSInterop
+@inject IJSRuntime JS
+@attribute [ComponentDoc(
+    Slug = "form-combobox",
+    TypeArguments = new[] { typeof(string) },
+    Name = "FormCombobox",
+    Group = "Formulários",
+    Description = "Seleção Bootstrap com busca, seleção múltipla e navegação por teclado.",
+    Code = "<FormCombobox TValue=\"string\" Label=\"Departamento\" Items=\"@departments\" Search SearchNormalize Placeholder=\"Selecione ou pesquise\" @bind-Value=\"department\" />\n\n@code {\n    private string? department;\n    private readonly FormComboboxOption[] departments = [\n        new(\"sales\", \"Comercial\"),\n        new(\"support\", \"Suporte\"),\n        new(\"finance\", \"Financeiro\")\n    ];\n}",
+    Guidance = "FormCombobox usa o Combobox nativo do Bootstrap 6. Itens são definidos por FormComboboxOption e TValue é o tipo do valor selecionado. Ative Search para filtrar, SearchNormalize para ignorar acentos e Multiple para selecionar vários valores; nesse modo, use um TValue de coleção, como string[] ou List<string>. Placement, Boundary e Offset controlam o posicionamento do menu."
+)]
+
+<FieldLayout Theme="@Theme" ColorScheme="@ColorScheme" Id="@Id" Label="@Label" Required="@Required" HelpText="@HelpText" ErrorMessage="@ValidationError" ClassExtra="@ClassExtra" UseMarginBottom="@UseMarginBottom">
+    @if (Name is not null && !Multiple && SelectedOptions.Count == 0)
+    {
+        <input type="hidden" name="@Name" value="" disabled="@Disabled" />
+    }
+    else
+    {
+        @foreach (var selected in SelectedOptions)
+        {
+            @if (Name is not null)
+            {
+                <input type="hidden" name="@Name" value="@GetValueString(selected.Value)" disabled="@Disabled" />
+            }
+        }
+    }
+    <div class="dropdown">
+        <button @attributes="ToggleAttributes" @ref="toggleElement" id="@Id" type="button" class="@ToggleClass"
+                data-bs-toggle="combobox" role="combobox" aria-haspopup="listbox" aria-expanded="false"
+                aria-controls="@($"{Id}-menu")" aria-labelledby="@(string.IsNullOrWhiteSpace(Label) ? null : $"{Id}-label")"
+                aria-invalid="@Invalid" aria-required="@Required" aria-describedby="@DescribedBy" disabled="@Disabled">
+            <span class="combobox-value @(SelectedOptions.Count == 0 ? "combobox-placeholder" : null)">@DisplayText</span>
+            <span class="combobox-caret" aria-hidden="true"><Icon Name="chevron-down" /></span>
+        </button>
+        <div id="@($"{Id}-menu")" class="menu" role="listbox" aria-multiselectable="@Multiple">
+            @if (Search)
+            {
+                <div class="combobox-search">
+                    <input class="form-control combobox-search-input" type="search" placeholder="@SearchPlaceholder"
+                           aria-label="@SearchLabel" autocomplete="off" />
+                </div>
+            }
+            @foreach (var item in Items)
+            {
+                var selected = IsSelected(item);
+                <div class="menu-item @(selected ? "selected" : null) @(item.Disabled ? "disabled" : null)"
+                     data-bs-value="@GetValueString(item.Value)" role="option" tabindex="-1"
+                     aria-selected="@selected" aria-disabled="@(item.Disabled ? "true" : null)">
+                    <div class="menu-item-content">
+                        <span>@item.Label</span>
+                        @if (!string.IsNullOrWhiteSpace(item.Description))
+                        {
+                            <span class="menu-item-description">@item.Description</span>
+                        }
+                    </div>
+                    <span class="menu-item-check" aria-hidden="true"><Icon Name="check-lg" /></span>
+                </div>
+            }
+            <div class="combobox-no-results d-none">@NoResultsText</div>
+        </div>
+    </div>
+</FieldLayout>
+
+@code {
+    private ElementReference toggleElement;
+    private IJSObjectReference? module;
+    private IJSObjectReference? combobox;
+    private DotNetObjectReference<FormCombobox<TValue>>? receiver;
+    private string? activeConfig;
+
+    [ParameterDoc("Opções disponíveis. Cada opção contém um valor, rótulo, descrição opcional e estado desabilitado.")]
+    [Parameter, EditorRequired] public IReadOnlyList<FormComboboxOption> Items { get; set; } = Array.Empty<FormComboboxOption>();
+    [ParameterDoc("Permite selecionar mais de uma opção. Nesse modo, TValue deve ser uma coleção.")]
+    [Parameter] public bool Multiple { get; set; }
+    [ParameterDoc("Exibe um campo para filtrar as opções.")]
+    [Parameter] public bool Search { get; set; }
+    [ParameterDoc("Ignora diferenças de acentuação durante a busca.")]
+    [Parameter] public bool SearchNormalize { get; set; }
+    [ParameterDoc("Texto mostrado quando nenhuma opção foi selecionada.")]
+    [Parameter] public string? Placeholder { get; set; }
+    [ParameterDoc("Texto de orientação do campo de busca.", Default = "Pesquisar...")]
+    [Parameter] public string SearchPlaceholder { get; set; } = "Pesquisar...";
+    [ParameterDoc("Rótulo acessível para o campo de busca.", Default = "Pesquisar opções")]
+    [Parameter] public string SearchLabel { get; set; } = "Pesquisar opções";
+    [ParameterDoc("Mensagem exibida quando a busca não encontra opções.", Default = "Nenhum resultado")]
+    [Parameter] public string NoResultsText { get; set; } = "Nenhum resultado";
+    [ParameterDoc("Posicionamento do menu Bootstrap em relação ao campo.", Default = "bottom-start")]
+    [Parameter] public string Placement { get; set; } = "bottom-start";
+    [ParameterDoc("Limite de posicionamento do menu Bootstrap.", Default = "clippingParents")]
+    [Parameter] public string Boundary { get; set; } = "clippingParents";
+    [ParameterDoc("Deslocamento do menu em pixels: eixo principal e eixo transversal.", Default = "0, 2")]
+    [Parameter] public int[] Offset { get; set; } = [0, 2];
+    [ParameterDoc("Tamanho Bootstrap do campo: Small, Medium ou Large.", Default = "Medium")]
+    [Parameter] public FormControlSize Size { get; set; } = FormControlSize.Medium;
+
+    private string? Name => ComponentAttributes.Get(AdditionalAttributes, "name");
+    private string? DisplayText => SelectedOptions.Count == 0
+        ? Placeholder
+        : string.Join(", ", SelectedOptions.Select(option => option.Label));
+    private IReadOnlyList<FormComboboxOption> SelectedOptions => Items.Where(IsSelected).ToArray();
+    private string ToggleClass => ThemedClasses(AdditionalAttributes, "combobox-toggle form-control",
+        Size switch { FormControlSize.Small => "form-control-sm", FormControlSize.Large => "form-control-lg", _ => null });
+    private Dictionary<string, object>? ToggleAttributes => AdditionalAttributes is null
+        ? null
+        : AdditionalAttributes.Where(attribute => !new[] { "name", "class", "id", "disabled", "required", "placeholder", "aria-describedby" }
+                .Contains(attribute.Key, StringComparer.OrdinalIgnoreCase))
+            .ToDictionary(attribute => attribute.Key, attribute => attribute.Value);
+
+    private bool IsSelected(FormComboboxOption option) => GetSelectedValues().Contains(GetValueString(option.Value), StringComparer.Ordinal);
+
+    private string[] GetSelectedValues()
+    {
+        if (Multiple && Value is System.Collections.IEnumerable collection && Value is not string)
+        {
+            var values = new List<string>();
+            foreach (var item in collection)
+                if (item is not null) values.Add(GetValueString(item));
+            return values.ToArray();
+        }
+        return Value is null ? [] : [GetValueString(Value)];
+    }
+
+    private static string GetValueString(object value) => value is IFormattable formattable
+        ? formattable.ToString(null, System.Globalization.CultureInfo.InvariantCulture) ?? string.Empty
+        : value.ToString() ?? string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Items is null) throw new ArgumentNullException(nameof(Items));
+        if (Items.Any(item => item is null || item.Value is null))
+            throw new ArgumentException("Cada FormComboboxOption precisa ter um Value não nulo.", nameof(Items));
+        if (Items.Any(item => string.IsNullOrEmpty(GetValueString(item.Value))))
+            throw new ArgumentException("Os valores das opções de FormCombobox não podem ser vazios.", nameof(Items));
+        if (Items.Select(item => GetValueString(item.Value)).Distinct(StringComparer.Ordinal).Count() != Items.Count)
+            throw new ArgumentException("Cada opção de FormCombobox precisa ter um Value exclusivo.", nameof(Items));
+        if (Multiple && !IsSupportedCollectionType(typeof(TValue)))
+            throw new InvalidOperationException("FormCombobox com Multiple requer TValue como um array, List<T> ou interface implementada por essas coleções.");
+        if (!Multiple && GetCollectionItemType(typeof(TValue)) is not null)
+            throw new InvalidOperationException("FormCombobox sem Multiple requer TValue como um valor único.");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./_content/DesignSystem/js/combobox.js");
+        var config = GetConfigKey();
+        if (combobox is null || activeConfig != config)
+        {
+            if (combobox is not null)
+            {
+                await combobox.InvokeVoidAsync("dispose");
+                await combobox.DisposeAsync();
+            }
+            receiver ??= DotNetObjectReference.Create(this);
+            combobox = await module.InvokeAsync<IJSObjectReference>("connect", toggleElement, receiver, GetOptions());
+            activeConfig = config;
+        }
+        await combobox.InvokeVoidAsync("sync", GetSelectedValues(), DisplayText ?? string.Empty, Placeholder ?? string.Empty);
+    }
+
+    [JSInvokable]
+    public Task NotifyComboboxSelection(string[] values) => ChangeValueAndNotify(ConvertSelection(values));
+
+    private TValue ConvertSelection(string[] values)
+    {
+        if (Multiple)
+        {
+            var targetType = typeof(TValue);
+            var itemType = GetCollectionItemType(targetType)!;
+            var array = Array.CreateInstance(itemType, values.Length);
+            for (var index = 0; index < values.Length; index++)
+                array.SetValue(ConvertValue(values[index], itemType), index);
+            if (targetType.IsAssignableFrom(array.GetType())) return (TValue)(object)array;
+            var list = (System.Collections.IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(itemType))!;
+            foreach (var value in array) list.Add(value);
+            return (TValue)list;
+        }
+
+        return values.Length == 0 ? default! : (TValue)ConvertValue(values[0], typeof(TValue))!;
+    }
+
+    private static object? ConvertValue(string value, Type targetType)
+    {
+        var actualType = Nullable.GetUnderlyingType(targetType) ?? targetType;
+        if (actualType == typeof(string)) return value;
+        if (actualType.IsEnum) return Enum.Parse(actualType, value, ignoreCase: true);
+        var converter = System.ComponentModel.TypeDescriptor.GetConverter(actualType);
+        if (converter.CanConvertFrom(typeof(string)))
+            return converter.ConvertFrom(null, System.Globalization.CultureInfo.InvariantCulture, value);
+        return Convert.ChangeType(value, actualType, System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    private static Type? GetCollectionItemType(Type type)
+    {
+        if (type == typeof(string)) return null;
+        if (type.IsArray) return type.GetElementType();
+        return type.GetInterfaces().Append(type)
+            .FirstOrDefault(candidate => candidate.IsGenericType && candidate.GetGenericTypeDefinition() == typeof(IEnumerable<>))?
+            .GetGenericArguments()[0];
+    }
+
+    private static bool IsSupportedCollectionType(Type type)
+    {
+        var itemType = GetCollectionItemType(type);
+        if (itemType is null) return false;
+        var arrayType = itemType.MakeArrayType();
+        var listType = typeof(List<>).MakeGenericType(itemType);
+        return type.IsAssignableFrom(arrayType) || type.IsAssignableFrom(listType);
+    }
+
+    private object GetOptions() => new
+    {
+        multiple = Multiple,
+        search = Search,
+        searchNormalize = SearchNormalize,
+        placeholder = Placeholder ?? string.Empty,
+        placement = Placement,
+        boundary = Boundary,
+        offset = Offset is { Length: 2 } ? Offset : [0, 2],
+        name = (string?)null
+    };
+
+    private string GetConfigKey() => $"{Multiple}|{Search}|{SearchNormalize}|{Placeholder}|{Placement}|{Boundary}|{string.Join(',', Offset ?? [])}";
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (combobox is not null)
+            {
+                await combobox.InvokeVoidAsync("dispose");
+                await combobox.DisposeAsync();
+            }
+            if (module is not null) await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException) { }
+        finally { receiver?.Dispose(); }
+    }
+}

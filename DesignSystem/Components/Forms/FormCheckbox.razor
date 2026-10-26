@@ -3,20 +3,20 @@
     Slug = "form-checkbox",
     Name = "FormCheckbox",
     Group = "Formulários",
-    Description = "Opções booleanas com apresentação de checkbox ou switch.",
-    Code = "<FormCheckbox Label=\"Receber notificações\" @bind-Value=\"enabled\" IsSwitch />\n\n@code {\n    private bool enabled;\n}",
-    Guidance = "IsSwitch muda apenas a apresentação. Para exigir valor true no modelo, use uma regra específica: Required sozinho não rejeita false."
+    Description = "Campo booleano com caixa de seleção quadrada.",
+    Code = "<FormCheckbox Label=\"Aceito os termos\" @bind-Value=\"accepted\" />\n\n@code {\n    private bool accepted;\n}",
+    Guidance = "Use FormCheckbox para uma caixa de seleção e FormSwitch para um interruptor. Para exigir valor true no modelo, use uma regra específica: Required sozinho não rejeita false. Theme define a cor marcada; Size usa FormControlSize: Small, Medium ou Large."
 )]
 
-<div class="mb-3 @ClassExtra">
-    <div class="form-check @(IsSwitch ? "form-switch" : null)">
-        <InputCheckbox @attributes="AdditionalAttributes" id="@Id" class="@ControlClass("form-check-input")"
+<div data-bs-theme="@DataBsTheme" class="@(UseMarginBottom ? "mb-4" : null) @ThemeClass @ClassExtra">
+    <div class="d-flex align-items-center gap-2">
+        <InputCheckbox @attributes="AdditionalAttributes" id="@Id" class="@ControlClass(CheckClass)"
                        Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" DisplayName="@Label"
-                       disabled="@Disabled" required="@Required" role="@(IsSwitch ? "switch" : null)"
+                       disabled="@Disabled" required="@Required"
                        aria-invalid="@Invalid" aria-describedby="@DescribedBy" />
         @if (!string.IsNullOrWhiteSpace(Label))
         {
-            <label class="form-check-label" for="@Id">@Label</label>
+            <label class="form-label mb-0" for="@Id">@Label</label>
         }
     </div>
     @if (!string.IsNullOrWhiteSpace(HelpText))
@@ -30,8 +30,15 @@
 </div>
 
 @code {
-    [ParameterDoc("Apresenta o checkbox como interruptor.")]
-    [Parameter] public bool IsSwitch { get; set; }
+    [ParameterDoc("Tamanho Bootstrap do controle: Small, Medium ou Large.")]
+    [Parameter] public FormControlSize Size { get; set; } = FormControlSize.Medium;
+
+    private string CheckClass => Size switch
+    {
+        FormControlSize.Small => "check check-sm",
+        FormControlSize.Large => "check check-lg",
+        _ => "check"
+    };
 }
 
 

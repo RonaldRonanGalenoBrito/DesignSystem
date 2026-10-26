@@ -1,0 +1,30 @@
+@inherits ExampleBase
+@attribute [ComponentExample(typeof(FormText))]
+
+<div class="options-panel">
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="colorScheme">
+            <option value="Inherit">Padrão</option>
+            <option value="Light">Claro</option>
+            <option value="Dark">Escuro</option>
+        </select>
+    </label>
+    <label>Tamanho
+        <select class="form-control form-control-sm mt-1" @bind="size">
+            @foreach (var value in Enum.GetValues<FormControlSize>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+</div>
+<CodeExample Code="@Code">
+<FormText Label="Pesquisar" @bind-Value="name" HelpText="Informe um termo para pesquisar." StartIcon="search" ColorScheme="@colorScheme" Size="@size" />
+<p class="small fg-2 mb-0">Valor: @name</p>
+</CodeExample>
+
+@code {
+    private FormColorScheme colorScheme = FormColorScheme.Inherit;
+    private FormControlSize size = FormControlSize.Medium;
+    private string name = "";
+    private string Code => "<FormText Label=\"Pesquisar\" @bind-Value=\"name\" HelpText=\"Informe um termo para pesquisar.\" StartIcon=\"search\"" + ColorSchemeAttribute(colorScheme) + FormControlSizeAttribute(size) + " />"
+        + "\n\n@code { private string name = \"\"; }";
+}
+

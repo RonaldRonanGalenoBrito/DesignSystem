@@ -1,0 +1,196 @@
+@page "/icones"
+@page "/icons"
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<PageTitle>Bootstrap Icons · Catálogo</PageTitle>
+
+<div class="icon-library">
+    <header class="icon-library-heading">
+        <div>
+            <div class="eyebrow">Biblioteca visual</div>
+            <h1>Bootstrap Icons</h1>
+            <p class="doc-lead">Explore os ícones disponíveis, ajuste o tamanho e o tema e copie o nome para usar no componente <code>Icon</code>.</p>
+        </div>
+    </header>
+
+    <div class="icon-library-layout">
+        <aside class="icon-library-sidebar" aria-label="Navegar pelos ícones">
+            <div class="icon-library-package">
+                <code>bootstrap-icons</code>
+                <span>Bootstrap Icons 1.13.2</span>
+            </div>
+            <div class="icon-library-sidebar-title">Explorar por letra</div>
+            <button type="button" class="icon-letter-link @(activeLetter is null ? "active" : null)" @onclick="() => SetLetter(null)">
+                <span>Todos os ícones</span><span class="icon-letter-count">@iconNames.Length</span>
+            </button>
+            <button type="button" class="icon-letter-link @(activeLetter == "#" ? "active" : null)" @onclick="SetNumbers">
+                <span>0–9</span><span class="icon-letter-count">@LetterCount("#")</span>
+            </button>
+            @foreach (var letter in Letters)
+            {
+                var count = LetterCount(letter);
+                if (count == 0) { continue; }
+                <button type="button" class="icon-letter-link @(activeLetter == letter ? "active" : null)" @onclick="() => SetLetter(letter)">
+                    <span>@letter</span><span class="icon-letter-count">@count</span>
+                </button>
+            }
+        </aside>
+
+        <section class="icon-library-content" aria-label="Catálogo de ícones">
+            <div class="icon-library-toolbar">
+                <div class="icon-library-filter">
+                    <label class="visually-hidden" for="icon-filter">Filtrar ícones</label>
+                    <Icon Name="search" />
+                    <input id="icon-filter" type="search" placeholder="Filtrar por nome..." @bind="search" @bind:event="oninput" />
+                    @if (!string.IsNullOrWhiteSpace(search))
+                    {
+                        <button type="button" class="icon-filter-clear" @onclick="() => search = string.Empty" aria-label="Limpar busca"><Icon Name="x-lg" /></button>
+                    }
+                </div>
+                <div class="icon-library-controls">
+                    <div class="icon-size-picker" role="group" aria-label="Tamanho dos ícones">
+                        @foreach (var option in Sizes)
+                        {
+                            <button type="button" class="@(iconSize == option ? "active" : null)" aria-pressed="@(iconSize == option)" @onclick="() => iconSize = option">@option</button>
+                        }
+                    </div>
+                    <label class="icon-theme-picker">
+                        <span>Tema</span>
+                        <select class="form-control" @bind="theme">
+                            <option value="">Padrão</option>
+                            @foreach (var value in Enum.GetValues<ThemeColor>())
+                            {
+                                <option value="@value">@value</option>
+                            }
+                        </select>
+                    </label>
+                </div>
+            </div>
+
+            @if (loading)
+            {
+                <p class="icon-library-status" role="status">Carregando ícones…</p>
+            }
+            else if (loadError is not null)
+            {
+                <p class="icon-library-status fg-danger" role="alert">@loadError</p>
+            }
+            else
+            {
+                var filtered = FilteredIcons;
+                <div class="icon-result-heading">
+                    <h2>@(activeLetter is null ? "Todos os ícones" : activeLetter == "#" ? "Ícones de 0 a 9" : $"Ícones: {activeLetter}")</h2>
+                    <span>@filtered.Length ícones</span>
+                </div>
+                @if (filtered.Length == 0)
+                {
+                    <div class="icon-empty-state">
+                        <Icon Name="search" SizeClass="fs-2xl" />
+                        <p>Nenhum ícone corresponde a essa busca.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="icon-card-grid">
+                        @foreach (var name in filtered.Take(visibleCount))
+                        {
+                            <article class="icon-card" @key="name">
+                                <div class="icon-card-preview" title="@name">
+                                    <Icon Name="@name" Theme="@theme" Style="@($"font-size: {iconSize}px")" />
+                                </div>
+                                <div class="icon-card-name" title="@name">@name</div>
+                                <div class="icon-card-actions">
+                                    <button type="button" @onclick="() => CopyNameAsync(name)" aria-label="@($"Copiar nome {name}")" title="Copiar nome">
+                                        <Icon Name="@(copiedName == name ? "check2" : "copy")" />
+                                    </button>
+                                    <button type="button" @onclick="() => CopyMarkupAsync(name)" aria-label="@($"Copiar código Razor do ícone {name}")" title="Copiar código Razor">
+                                        <span class="icon-code-action">&lt;/&gt;</span>
+                                    </button>
+                                </div>
+                            </article>
+                        }
+                    </div>
+                    @if (filtered.Length > visibleCount)
+                    {
+                        <div class="icon-load-more">
+                            <button type="button" class="btn btn-outline-secondary" @onclick="LoadMore">Carregar mais ícones</button>
+                            <span>Exibindo @Math.Min(visibleCount, filtered.Length) de @filtered.Length</span>
+                        </div>
+                    }
+                }
+            }
+            <p class="visually-hidden" aria-live="polite">@copyStatus</p>
+        </section>
+    </div>
+</div>
+
+@code {
+    private static readonly string[] Letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Select(character => character.ToString()).ToArray();
+    private static readonly int[] Sizes = [16, 24, 32];
+    private const int InitialVisibleCount = 120;
+    private const int VisibleBatchSize = 120;
+    private IJSObjectReference? module;
+    private string[] iconNames = [];
+    private string search = string.Empty;
+    private string? activeLetter;
+    private string? loadError;
+    private string? copiedName;
+    private string copyStatus = string.Empty;
+    private ThemeColor? theme;
+    private int iconSize = 24;
+    private int visibleCount = InitialVisibleCount;
+    private bool loading = true;
+
+    private string[] FilteredIcons => iconNames.Where(name =>
+        (activeLetter is null || (activeLetter == "#" ? char.IsDigit(name[0]) : name.StartsWith(activeLetter, StringComparison.OrdinalIgnoreCase))) &&
+        (string.IsNullOrWhiteSpace(search) || name.Contains(search.Trim(), StringComparison.OrdinalIgnoreCase))).ToArray();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        try
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./icon-catalog.js?v=1.13.2");
+            iconNames = await module.InvokeAsync<string[]>("getIconNames");
+        }
+        catch (JSException)
+        {
+            loadError = "Não foi possível carregar o catálogo de Bootstrap Icons.";
+        }
+        finally
+        {
+            loading = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private int LetterCount(string letter) => iconNames.Count(name => letter == "#" ? char.IsDigit(name[0]) : name.StartsWith(letter, StringComparison.OrdinalIgnoreCase));
+    private void SetLetter(string? letter) { activeLetter = letter; visibleCount = InitialVisibleCount; }
+    private void SetNumbers() => SetLetter("#");
+    private void LoadMore() => visibleCount += VisibleBatchSize;
+
+    private async Task CopyNameAsync(string name)
+    {
+        if (module is null) return;
+        await module.InvokeVoidAsync("copyText", name);
+        copiedName = name;
+        copyStatus = $"Nome do ícone {name} copiado.";
+    }
+
+    private async Task CopyMarkupAsync(string name)
+    {
+        if (module is null) return;
+        var themeAttribute = theme is { } value ? $" Theme=\"ThemeColor.{value}\"" : string.Empty;
+        await module.InvokeVoidAsync("copyText", $"<Icon Name=\"{name}\"{themeAttribute} />");
+        copiedName = name;
+        copyStatus = $"Código Razor do ícone {name} copiado.";
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is null) return;
+        try { await module.DisposeAsync(); }
+        catch (JSDisconnectedException) { }
+    }
+}

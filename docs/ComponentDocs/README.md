@@ -21,8 +21,8 @@ Decore o próprio componente Razor com `ComponentDoc`:
     Slug = "button",
     Name = "Button",
     Group = "Ações",
-    Description = "Botões com variantes, ícones e estados.",
-    Code = "<Button Variant=\"ButtonVariant.Primary\">Salvar</Button>",
+    Description = "Botões com tema, estilo, ícones e estados.",
+    Code = "<Button Theme=\"ThemeColor.Primary\" Appearance=\"ButtonStyle.Solid\">Salvar</Button>",
     Guidance = "Use Type=Submit dentro de um EditForm.",
     Order = 10
 )]
@@ -37,11 +37,11 @@ O catálogo encontra automaticamente os tipos públicos com esse atributo na ass
 - **Order:** posição dentro do grupo. Empates são ordenados por nome; grupos têm ordenação ordinal determinística.
 - **TypeArguments:** especialização representativa para componentes genéricos.
 
-Para FormInputNumber, por exemplo:
+Para FormNumber, por exemplo:
 
 ```razor
 @attribute [ComponentDoc(
-    Slug = "form-input-number",
+    Slug = "form-number",
     Group = "Formulários",
     Description = "Entrada numérica tipada.",
     TypeArguments = new[] { typeof(decimal?) }
@@ -89,11 +89,11 @@ Cada prévia fica em um arquivo próprio em `Components/Examples`, com registro 
 @attribute [ComponentExample(typeof(Button))]
 
 <CodeExample Code="@Entry.Code">
-    <Button Variant="ButtonVariant.Primary">Salvar</Button>
+    <Button Theme="ThemeColor.Primary" Appearance="ButtonStyle.Solid">Salvar</Button>
 </CodeExample>
 ```
 
-Para genéricos, registre a definição aberta: `typeof(FormSelect<>)`. A prévia pode usar `<FormSelect TValue="int?" ...>`.
+Para genéricos, registre a definição aberta: `typeof(FormCombobox<>)`. A prévia pode usar `<FormCombobox TValue="string" ...>`.
 
 Não é necessário editar Showcase nem manter um switch de slugs. ComponentExample relaciona o exemplo ao **tipo** do componente, por isso mudar um slug não quebra esse vínculo. Prévias duplicadas ou sem o parâmetro Entry são rejeitadas.
 
@@ -107,11 +107,8 @@ Um componente novo sem prévia já ganha página, orientações, código e refer
 dotnet build DesignSystem.slnx -c Release
 dotnet run --project tests/ComponentTests -c Release
 dotnet run --project tests/DocumentationTests -c Release
-powershell -File docs/ComponentDocs/Verify-Manual.ps1
 ```
 
 DocumentationTests verifica descoberta por atributos, genéricos, descrições herdadas, padrões, tipos anuláveis, opções de enums, ordenação, registros de prévias e rejeição de metadados inválidos.
-
-Verify-Manual pressupõe o manual em execução e descobre as páginas pelos links do catálogo renderizado. Não depende de analisar código C# nem de uma contagem fixa de componentes. Para outra porta, use `-BaseUrl http://localhost:5191`.
 
 A escolha de tema dura a sessão atual, sem persistência local. A cópia de código usa a Clipboard API e apresenta uma alternativa quando não está disponível.

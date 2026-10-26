@@ -1,13 +1,27 @@
 @inherits ExampleBase
 @attribute [ComponentExample(typeof(FormCheckbox))]
 
+<div class="options-panel">
+    <label>Tema<select class="form-control form-control-sm mt-1" @bind="theme">
+        <option value="">Padrão</option>
+        @foreach (var value in Enum.GetValues<ThemeColor>()) { <option value="@value">@value</option> }
+    </select></label>
+    <label>Tamanho<select class="form-control form-control-sm mt-1" @bind="size">
+        @foreach (var value in Enum.GetValues<FormControlSize>()) { <option value="@value">@value</option> }
+    </select></label>
+</div>
+
 <CodeExample Code="@Code">
-<FormCheckbox Label="Receber notificações" @bind-Value="enabled" IsSwitch />
-<p class="small text-body-secondary mb-0">Valor: @(enabled ? "true" : "false")</p>
+<FormCheckbox Theme="@theme" Size="@size" Label="Aceito os termos" @bind-Value="enabled" />
+<p class="small fg-2 mb-0">Valor: @(enabled ? "true" : "false")</p>
 </CodeExample>
 
 @code {
     private bool enabled;
-    private string Code => Entry.Code;
+    private ThemeColor? theme;
+    private FormControlSize size = FormControlSize.Medium;
+    private string ThemeAttribute => theme is { } value ? $" Theme=\"ThemeColor.{value}\"" : string.Empty;
+    private string SizeAttribute => FormControlSizeAttribute(size);
+    private string Code => $"<FormCheckbox{ThemeAttribute}{SizeAttribute} Label=\"Aceito os termos\" @bind-Value=\"enabled\" />\n\n@code {{\n    private bool enabled;\n}}";
 }
 

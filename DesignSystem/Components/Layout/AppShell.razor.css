@@ -5,12 +5,12 @@
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto 1fr;
     grid-template-areas: "header" "sidebar" "page";
-    background: var(--bs-tertiary-bg);
-    color: var(--bs-body-color);
+    background: var(--bs-theme-bg-subtle, var(--bs-bg-2));
+    color: var(--bs-theme-fg, var(--bs-fg-body));
 }
 .app-shell-header { grid-area: header; position: sticky; top: 0; z-index: 1020; }
 .app-shell-body { display: contents; }
-.app-shell-sidebar { grid-area: sidebar; display: none; background: var(--bs-body-bg); }
+.app-shell-sidebar { grid-area: sidebar; display: none; background: var(--bs-theme-bg-subtle, var(--bs-bg-body)); }
 .app-shell-sidebar.is-open { display: flex; flex-direction: column; }
 .app-shell-page { grid-area: page; display: flex; flex-direction: column; min-width: 0; }
 .app-shell-page main { flex: 1; overflow-wrap: anywhere; }

@@ -1,3 +1,4 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "accordion-item", Name = "AccordionItem", Group = "Conteúdo",
     Description = "Painel de um acordeão, com título, conteúdo e estado desabilitado.",
@@ -5,17 +6,16 @@
     Guidance = "Deve estar dentro de Accordion. Informe um Id estável para controlar a abertura por ExpandedIds. TitleContent substitui Title; não coloque controles interativos dentro do título, que já é um botão. Enter e Espaço alternam o painel. HeadingLevel adapta o nível do título à página."
 )]
 
-<div @attributes="AdditionalAttributes" id="@Id" class="@ComponentAttributes.Classes(AdditionalAttributes, "accordion-item", ClassExtra)">
-    <div class="accordion-header" role="heading" aria-level="@HeadingLevel">
-        <button id="@($"{Id}-trigger")" type="button" class="accordion-button @(IsExpanded ? null : "collapsed")"
-                disabled="@Disabled" aria-expanded="@(IsExpanded ? "true" : "false")" aria-controls="@($"{Id}-panel")" @onclick="Toggle">
+<details @attributes="AdditionalAttributes" id="@Id" open="@IsExpanded" class="@ThemedClasses(AdditionalAttributes, "accordion-item", ClassExtra)">
+    <summary id="@($"{Id}-trigger")" class="accordion-header" aria-disabled="@(Disabled ? "true" : null)"
+             aria-controls="@($"{Id}-panel")" @onclick="Toggle" @onclick:preventDefault="true">
+        <span role="heading" aria-level="@HeadingLevel">
             @if (TitleContent is not null) { @TitleContent } else { @Title }
-        </button>
-    </div>
-    <div id="@($"{Id}-panel")" class="accordion-collapse collapse @(IsExpanded ? "show" : null)" hidden="@(!IsExpanded)" aria-labelledby="@($"{Id}-trigger")">
-        <div class="accordion-body">@ChildContent</div>
-    </div>
-</div>
+        </span>
+        <svg class="accordion-icon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" /></svg>
+    </summary>
+    <div id="@($"{Id}-panel")" class="accordion-body" aria-labelledby="@($"{Id}-trigger")">@ChildContent</div>
+</details>
 
 @code {
     [CascadingParameter] public AccordionContext? Context { get; set; }

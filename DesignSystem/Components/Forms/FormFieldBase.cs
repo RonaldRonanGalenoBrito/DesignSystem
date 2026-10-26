@@ -2,11 +2,12 @@ using DesignSystem.Attributes;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
+using DesignSystem.Enums;
 
 namespace DesignSystem.Components.Forms;
 
 /// <summary>Shared presentation and validation for Bootstrap form controls.</summary>
-public abstract class FormFieldBase<TValue> : ComponentBase, IDisposable
+public abstract class FormFieldBase<TValue> : ThemedComponentBase, IDisposable
 {
     [CascadingParameter] private EditContext? CascadedEditContext { get; set; }
     [ParameterDoc("Identificador HTML para associar controle, label e mensagens.", Default = "Gerado automaticamente")]
@@ -29,7 +30,9 @@ public abstract class FormFieldBase<TValue> : ComponentBase, IDisposable
     [Parameter] public bool Required { get; set; }
     [ParameterDoc("Classes do contêiner do campo. Use class para estilizar o controle.")]
     [Parameter] public string? ClassExtra { get; set; }
-    [ParameterDoc("Aplica a margem inferior Bootstrap (mb-3) ao contêiner do campo.", Default = "true")]
+    [ParameterDoc("Modo de cores Bootstrap do campo. Inherit usa o modo do elemento ancestral.", Default = "Inherit")]
+    [Parameter] public FormColorScheme ColorScheme { get; set; } = FormColorScheme.Inherit;
+    [ParameterDoc("Aplica a margem inferior Bootstrap (mb-4) ao contêiner do campo.", Default = "true")]
     [Parameter] public bool UseMarginBottom { get; set; } = true;
     [ParameterDoc("Atributos HTML adicionais; class é combinada às classes do componente.")]
     [Parameter(CaptureUnmatchedValues = true)] public Dictionary<string, object>? AdditionalAttributes { get; set; }
@@ -40,6 +43,12 @@ public abstract class FormFieldBase<TValue> : ComponentBase, IDisposable
     protected string? ValidationError => ErrorMessage ?? CascadedEditContext?
         .GetValidationMessages(FieldIdentifier.Create(EffectiveExpression)).FirstOrDefault();
     protected string? Invalid => ValidationError is not null ? "true" : null;
+    protected string? DataBsTheme => ColorScheme switch
+    {
+        FormColorScheme.Light => "light",
+        FormColorScheme.Dark => "dark",
+        _ => null
+    };
     protected string DescribedBy => string.Join(" ", new[]
     {
         ComponentAttributes.Get(AdditionalAttributes, "aria-describedby"),
@@ -47,8 +56,18 @@ public abstract class FormFieldBase<TValue> : ComponentBase, IDisposable
         ValidationError is null ? null : $"{Id}-error"
     }.Where(value => !string.IsNullOrWhiteSpace(value)));
     protected string ControlClass(string baseClass) =>
-        ComponentAttributes.Classes(AdditionalAttributes, baseClass, Invalid is null ? null : "is-invalid");
+        ThemedClasses(AdditionalAttributes, baseClass, Invalid is null ? null : "is-invalid");
+    protected string ControlClass(string baseClass, FormControlSize size) =>
+        ThemedClasses(AdditionalAttributes, baseClass,
+            size switch { FormControlSize.Small => "form-control-sm", FormControlSize.Large => "form-control-lg", _ => null },
+            Invalid is null ? null : "is-invalid");
     protected Task ChangeValue(TValue value) => Disabled ? Task.CompletedTask : ValueChanged.InvokeAsync(value);
+    protected async Task ChangeValueAndNotify(TValue value)
+    {
+        if (Disabled) return;
+        await ValueChanged.InvokeAsync(value);
+        CascadedEditContext?.NotifyFieldChanged(FieldIdentifier.Create(EffectiveExpression));
+    }
 
     protected override void OnParametersSet()
     {

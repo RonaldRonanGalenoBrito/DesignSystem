@@ -3,17 +3,25 @@
 @implements IDisposable
 
 <div class="options-panel">
-    <label>Tamanho<select class="form-select form-select-sm mt-1" @bind="size">@foreach (var value in Enum.GetValues<PaginationSize>()) { <option value="@value">@value</option> }</select></label>
-    <label class="form-check"><input type="checkbox" class="form-check-input" @bind="pagination.IsLoading" /> Carregando</label>
+    <label>Tema
+        <select class="form-control form-control-sm mt-1" @bind="theme">
+            <option value="">Padrão</option>
+            @foreach (var value in Enum.GetValues<ThemeColor>()) { <option value="@value">@value</option> }
+        </select>
+    </label>
+    <label>Tamanho<select class="form-control form-control-sm mt-1" @bind="size">@foreach (var value in Enum.GetValues<PaginationSize>()) { <option value="@value">@value</option> }</select></label>
+    <label class="d-flex align-items-center gap-2"><input type="checkbox" class="check" @bind="pagination.IsLoading" /> Carregando</label>
 </div>
 <CodeExample Code="@Code">
-    <Pagination State="@pagination" Size="@size" />
-    <p class="small text-body-secondary mt-3 mb-0" role="status">Página atual: @pagination.CurrentPage</p>
+    <Pagination State="@pagination" Size="@size" Theme="@theme" />
+    <p class="small fg-2 mt-4 mb-0" role="status">Página atual: @pagination.CurrentPage</p>
 </CodeExample>
 
 @code {
     private readonly PaginationState<string> pagination = new(pageSize: 10);
     private PaginationSize size = PaginationSize.Medium;
+    private ThemeColor? theme;
+    private string ThemeAttribute => theme is { } value ? $" Theme=\"ThemeColor.{value}\"" : string.Empty;
 
     protected override void OnInitialized()
     {
@@ -25,5 +33,5 @@
 
     public void Dispose() => pagination.Changed -= HandlePaginationChanged;
 
-    private string Code => $"<Pagination State=\"@pagination\" Size=\"PaginationSize.{size}\" />\n\n@code {{\n    private readonly PaginationState<string> pagination = new(pageSize: 10);\n\n    protected override void OnInitialized()\n    {{\n        pagination.SetItems(Enumerable.Range(1, 300).Select(number => $\"Registro {{number}}\"));\n    }}\n}}";
+    private string Code => $"<Pagination State=\"@pagination\" Size=\"PaginationSize.{size}\"{ThemeAttribute} />\n\n@code {{\n    private readonly PaginationState<string> pagination = new(pageSize: 10);\n\n    protected override void OnInitialized()\n    {{\n        pagination.SetItems(Enumerable.Range(1, 300).Select(number => $\"Registro {{number}}\"));\n    }}\n}}";
 }

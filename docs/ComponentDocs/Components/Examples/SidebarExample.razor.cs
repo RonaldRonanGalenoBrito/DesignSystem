@@ -7,8 +7,8 @@ private string background = "#1b6098", foreground = "#ffffff", active = "#ffffff
                  ItemTextColor="{{foreground}}" ItemHoverBackgroundColor="#164d7a" ItemHoverTextColor="#ffffff"
                  ItemActiveBackgroundColor="{{active}}" ItemActiveTextColor="#1b6098">
             <HeaderContent>
-                <div class="d-flex align-items-center gap-3">
-                    <Icon Name="buildings" SizeClass="fs-2" />
+                <div class="d-flex align-items-center gap-4">
+                    <Icon Name="buildings" SizeClass="fs-3xl" />
                     <div><strong>Meu projeto</strong><div class="small">Área de trabalho</div></div>
                 </div>
             </HeaderContent>

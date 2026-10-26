@@ -1,3 +1,4 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "pagination", Name = "Pagination", Group = "Dados",
     Description = "Navegação entre páginas com janela de números, reticências, resumo de registros e binding.",
@@ -10,7 +11,7 @@
 {
     @if (HasSummary)
     {
-        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-4">
             <p class="mb-0 @SummaryClass">@Summary</p>
             @PaginationNavigation
         </div>
@@ -22,7 +23,7 @@
 }
 
 @code {
-    private RenderFragment PaginationNavigation => @<nav @attributes="AdditionalAttributes" aria-label="@Label" class="@ComponentAttributes.Classes(AdditionalAttributes, ClassExtra)">
+    private RenderFragment PaginationNavigation => @<nav @attributes="AdditionalAttributes" aria-label="@Label" class="@ThemedClasses(AdditionalAttributes, ClassExtra)">
         <ul class="pagination flex-wrap mb-0 @SizeClass">
             <li class="page-item @(IsDisabled || EffectivePage == 1 ? "disabled" : null)">
                 <button type="button" class="page-link" disabled="@(IsDisabled || EffectivePage == 1)" aria-label="@PreviousLabel" @onclick="() => Select(EffectivePage - 1)">@PreviousLabel</button>

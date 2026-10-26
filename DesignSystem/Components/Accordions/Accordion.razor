@@ -1,11 +1,12 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "accordion", Name = "Accordion", Group = "Conteúdo",
     Description = "Agrupa painéis expansíveis, com abertura única ou múltipla.",
     Code = "<Accordion>\n    <AccordionItem Id=\"details\" Title=\"Detalhes\">Conteúdo do painel.</AccordionItem>\n    <AccordionItem Id=\"help\" Title=\"Ajuda\">Como podemos ajudar?</AccordionItem>\n</Accordion>",
-    Guidance = "Use AccordionItem como conteúdo, com IDs únicos na página. AllowMultiple permite vários painéis abertos. ExpandedIds aceita binding para controlar a expansão. O primeiro ID informado prevalece no modo único. O conteúdo fechado permanece montado, preservando o estado. A expansão é imediata, sem animação nem JavaScript do Bootstrap."
+    Guidance = "Use AccordionItem como conteúdo, com IDs únicos na página. Theme colore os painéis abertos; Gap separa os painéis; Small usa apresentação compacta. Para personalizar o espaçamento, use style com --bs-accordion-gap. AllowMultiple permite vários painéis abertos. ExpandedIds aceita binding para controlar a expansão. O primeiro ID informado prevalece no modo único. O conteúdo fechado permanece montado, preservando o estado. Usa details/summary e animação CSS nativa do Bootstrap 6; o Blazor sincroniza ExpandedIds."
 )]
 
-<div @attributes="AdditionalAttributes" class="@ComponentAttributes.Classes(AdditionalAttributes, "accordion", Flush ? "accordion-flush" : null, ClassExtra)">
+<div @attributes="AdditionalAttributes" class="@ThemedClasses(AdditionalAttributes, "accordion", Gap ? "accordion-gap" : null, Small ? "accordion-sm" : null, Flush ? "accordion-flush" : null, ClassExtra)">
     <CascadingValue Value="@Context">@ChildContent</CascadingValue>
 </div>
 
@@ -16,6 +17,10 @@
     public bool AllowMultiple { get; set; }
     [Parameter, ParameterDoc("Remove bordas externas e arredondamento.")]
     public bool Flush { get; set; }
+    [Parameter, ParameterDoc("Separa os painéis com espaçamento e cantos arredondados usando accordion-gap. O espaçamento pode ser ajustado com --bs-accordion-gap no atributo style.")]
+    public bool Gap { get; set; }
+    [Parameter, ParameterDoc("Usa accordion-sm para reduzir preenchimento, fonte e arredondamento.")]
+    public bool Small { get; set; }
     [Parameter, ParameterDoc("IDs dos painéis abertos. Aceita @bind-ExpandedIds.", Default = "Coleção vazia")]
     public IReadOnlyCollection<string> ExpandedIds { get; set; } = Array.Empty<string>();
     [Parameter, ParameterDoc("Notifica a coleção completa de IDs abertos após uma interação.")]

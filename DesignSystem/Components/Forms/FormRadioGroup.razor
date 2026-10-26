@@ -1,4 +1,4 @@
-﻿@typeparam TValue
+@typeparam TValue
 @inherits FormFieldBase<TValue>
 @attribute [ComponentDoc(
     Slug = "form-radio-group",
@@ -7,19 +7,21 @@
     Group = "Formulários",
     Description = "Grupo de opções mutuamente exclusivas com rótulo, ajuda e validação.",
     Code = "<FormRadioGroup TValue=\"string\" Label=\"Entrega\" @bind-Value=\"delivery\">\n    <FormRadio TValue=\"string\" Value=\"@(\"standard\")\" Label=\"Padrão\" />\n    <FormRadio TValue=\"string\" Value=\"@(\"express\")\" Label=\"Expressa\" />\n</FormRadioGroup>\n\n@code {\n    private string delivery = \"standard\";\n}",
-    Guidance = "Use FormRadioGroup com FormRadio para valores dos tipos string, enum, int ou outros tipos compatíveis. Todas as opções do mesmo grupo precisam ter o mesmo TValue."
+    Guidance = "Use FormRadioGroup com FormRadio para valores dos tipos string, enum, int ou outros tipos compatíveis. Todas as opções do mesmo grupo precisam ter o mesmo TValue. Size aceita FormControlSize Small, Medium ou Large."
 )]
 
-<div class="mb-3 @ClassExtra">
+<div data-bs-theme="@DataBsTheme" class="mb-4 @ThemeClass @ClassExtra">
     @if (!string.IsNullOrWhiteSpace(Label))
     {
         <label id="@($"{Id}-label")" class="form-label">@Label</label>
     }
 
     <div @attributes="AdditionalAttributes" class="@GroupClass" role="radiogroup" aria-labelledby="@LabelledBy" aria-invalid="@Invalid" aria-describedby="@DescribedBy">
-        <InputRadioGroup TValue="TValue" Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" Name="@Id">
-            @ChildContent
-        </InputRadioGroup>
+        <CascadingValue Value="@Size">
+            <InputRadioGroup TValue="TValue" Value="@Value" ValueChanged="ChangeValue" ValueExpression="@EffectiveExpression" Name="@Id">
+                @ChildContent
+            </InputRadioGroup>
+        </CascadingValue>
     </div>
 
     @if (!string.IsNullOrWhiteSpace(HelpText))
@@ -35,7 +37,9 @@
 @code {
     [ParameterDoc("Opções FormRadio do grupo.")]
     [Parameter] public RenderFragment? ChildContent { get; set; }
+    [ParameterDoc("Tamanho Bootstrap das opções: Small, Medium ou Large.", Default = "Medium")]
+    [Parameter] public FormControlSize Size { get; set; } = FormControlSize.Medium;
 
-    private string GroupClass => ComponentAttributes.Classes(AdditionalAttributes, Invalid is null ? null : "is-invalid");
+    private string GroupClass => ThemedClasses(AdditionalAttributes, Invalid is null ? null : "is-invalid");
     private string? LabelledBy => string.IsNullOrWhiteSpace(Label) ? null : $"{Id}-label";
 }

@@ -1,3 +1,4 @@
+@inherits ThemedComponentBase
 @attribute [ComponentDoc(
     Slug = "app-shell",
     Name = "AppShell",
@@ -8,8 +9,8 @@
 )]
 
 <CascadingValue Value="@Context">
-    <div @attributes="AdditionalAttributes" class="@ComponentAttributes.Classes(AdditionalAttributes, "app-shell", SidebarContent is not null ? "has-sidebar" : null, ClassExtra)">
-        <a class="visually-hidden-focusable position-absolute bg-body p-3 z-3" href="@($"#{MainId}")">@SkipLinkLabel</a>
+    <div @attributes="AdditionalAttributes" class="@ThemedClasses(AdditionalAttributes, "app-shell", SidebarContent is not null ? "has-sidebar" : null, ClassExtra)">
+        <a class="visually-hidden-focusable position-absolute bg-body p-4 z-3" href="@($"#{MainId}")">@SkipLinkLabel</a>
         <div class="app-shell-body">
             @if (SidebarContent is not null)
             {
@@ -28,12 +29,12 @@
                         <Header Title="@Title" />
                     }
                 </div>
-                <main id="@MainId" tabindex="-1" class="p-3 p-lg-4 @ContentClass">
+                <main id="@MainId" tabindex="-1" class="p-4 lg:p-6 @ContentClass">
                     @ChildContent
                 </main>
                 @if (FooterContent is not null)
                 {
-                    <footer class="border-top px-3 px-lg-4 py-3 mt-auto">@FooterContent</footer>
+                    <footer class="border-top px-4 lg:px-6 py-4 mt-auto">@FooterContent</footer>
                 }
             </div>
         </div>
